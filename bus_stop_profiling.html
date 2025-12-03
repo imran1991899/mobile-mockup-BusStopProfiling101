@@ -124,13 +124,14 @@
       <label>1️⃣ Select Depot</label>
       <select id="depot" required>
         <option value="">--Select Depot--</option>
-        <option>(OS) Batu Caves</option>
+        <option value="Batu Caves">Batu Caves</option>
+        <option value="Cheras Selatan">Cheras Selatan</option>
+        <option value="Maluri">Maluri</option>
       </select>
 
       <label>2️⃣ Select Route Number</label>
       <select id="route" required>
         <option value="">--Select Route--</option>
-        <option>100</option>
       </select>
 
       <label>3️⃣ Select Bus Stop</label>
@@ -205,6 +206,40 @@
 </div>
 
 <script>
+// Mapping Depot to Routes
+const depotRoutes = {
+  "Batu Caves": [
+    "151", "170", "171", "172", "173", "180", "190", "191", "200", "201", 
+    "202", "220", "222", "250", "251", "253"
+  ],
+  "Cheras Selatan": [
+    "540", "541", "551", "570", "580", "581", "590", "600", "602", "640", 
+    "641", "650", "651", "652"
+  ],
+  "Maluri": [
+    "221", "300", "301", "303", "402", "420", "421"
+  ]
+};
+
+// Event listener for Depot selection to update Route dropdown
+document.getElementById("depot").addEventListener("change", function() {
+  const depot = this.value;
+  const routeSelect = document.getElementById("route");
+
+  // Clear the current options
+  routeSelect.innerHTML = '<option value="">--Select Route--</option>';
+
+  // Populate routes based on selected depot
+  if (depotRoutes[depot]) {
+    depotRoutes[depot].forEach(route => {
+      const option = document.createElement("option");
+      option.value = route;
+      option.textContent = route;
+      routeSelect.appendChild(option);
+    });
+  }
+});
+
 /* ----------------------------------
    BUILD 3 PHOTO SLOTS
 ---------------------------------- */
@@ -282,63 +317,6 @@ for (let i = 0; i < maxPhotos; i++) {
     }
   };
 }
-
-/* ----------------------------------
-   AUTO SELECT SUBCATEGORY AND CATEGORY BASED ON ISSUE
----------------------------------- */
-document.getElementById("issue").addEventListener("change", function() {
-  const issue = this.value;
-
-  // Define mapping for Issues -> Subcategories -> Categories
-  const issueMapping = {
-    "Construction in progress nearby the bus stop": {
-      subcategory: "A2 - Pax",
-      category: "A - Safety"
-    },
-    "Missing infrastructure": {
-      subcategory: "B1 - Missing Pole",
-      category: "B - Insufficient Infra"
-    },
-    "Covered by trees": {
-      subcategory: "C1 - Routine",
-      category: "C - Maintenance"
-    },
-    "Malfunction lights": {
-      subcategory: "C2 - Infra",
-      category: "C - Maintenance"
-    },
-    "Outdated info panel": {
-      subcategory: "C2 - Infra",
-      category: "C - Maintenance"
-    },
-    "No bus marking - shelter": {
-      subcategory: "C3 - Bus Bay (Shelter)",
-      category: "C - Maintenance"
-    },
-    "No bus marking - Pole": {
-      subcategory: "C4 - Bus Bay (Pole)",
-      category: "C - Maintenance"
-    },
-    "No street lighting": {
-      subcategory: "C5 - Street Lighting",
-      category: "C - Maintenance"
-    },
-    "Parking issue": {
-      subcategory: "D1 - Enforcement",
-      category: "D - Enforcement"
-    }
-  };
-
-  // If the selected issue has a mapping, update the subcategory and category
-  if (issueMapping[issue]) {
-    document.getElementById("subcat1").value = issueMapping[issue].subcategory;
-    document.getElementById("subcat2").value = issueMapping[issue].category;
-  } else {
-    // If no match, clear the fields
-    document.getElementById("subcat1").value = "";
-    document.getElementById("subcat2").value = "";
-  }
-});
 
 /* ----------------------------------
    FORM SUBMIT + PARTIAL RESET
