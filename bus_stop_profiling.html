@@ -147,6 +147,45 @@
         <option>Non-Infrastructure</option>
       </select>
 
+      <!-- 5️⃣ Issue -->
+      <label>5️⃣ Issue</label>
+      <select id="issue" required>
+        <option value="">--Select Issue--</option>
+        <option>Construction in progress nearby the bus stop</option>
+        <option>Missing infrastructure</option>
+        <option>Covered by trees</option>
+        <option>Malfunction lights</option>
+        <option>Outdated info panel</option>
+        <option>No bus marking - shelter</option>
+        <option>No bus marking - pole</option>
+        <option>No street lighting</option>
+        <option>Parking issue</option>
+      </select>
+
+      <!-- 6️⃣ Subcategory -->
+      <label>6️⃣ Subcategory</label>
+      <select id="subcat1" required>
+        <option value="">--Select Subcategory--</option>
+        <option>A2 - Pax</option>
+        <option>B1 - Missing Pole</option>
+        <option>C1 - Routine</option>
+        <option>C2 - Infra</option>
+        <option>C3 - Bus Bay (Shelter)</option>
+        <option>C4 - Bus Bay (Pole)</option>
+        <option>C5 - Street Lighting</option>
+        <option>D1 - Enforcement</option>
+      </select>
+
+      <!-- 7️⃣ Category -->
+      <label>7️⃣ Category</label>
+      <select id="subcat2" required>
+        <option value="">--Select Category--</option>
+        <option>A - Safety</option>
+        <option>B - Insufficient Infra</option>
+        <option>C - Maintenance</option>
+        <option>D - Enforcement</option>
+      </select>
+
       <label>📸 Upload Pictures (Camera / File)</label>
       <div id="photoContainer"></div>
 
@@ -246,12 +285,15 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
   const route = document.getElementById("route").value.trim();
   const busStop = document.getElementById("busStop").value.trim();
   const condition = document.getElementById("condition").value;
+  const issue = document.getElementById("issue").value.trim();
+  const subcat1 = document.getElementById("subcat1").value.trim();
+  const subcat2 = document.getElementById("subcat2").value.trim();
 
   if(!/^\d{8}$/.test(staffId)){
     alert("⚠️ Staff ID must be exactly 8 digits.");
     return;
   }
-  if(!depot || !route || !busStop || !condition){
+  if(!depot || !route || !busStop || !condition || !issue || !subcat1 || !subcat2){
     alert("⚠️ Please fill all fields.");
     return;
   }
@@ -267,6 +309,9 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
   // Reset BUT KEEP staffId, depot, route
   document.getElementById("busStop").value = "";
   document.getElementById("condition").value = "";
+  document.getElementById("issue").value = "";
+  document.getElementById("subcat1").value = "";
+  document.getElementById("subcat2").value = "";
 
   photos = [null, null, null];
 
@@ -280,6 +325,3 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
 
 </body>
 </html>
-
-
-
