@@ -65,6 +65,8 @@
 
   .photo-slot:hover { background: #edffed; }
 
+  video.hidden { display: none; }
+
   button.submit-btn {
     margin-top: 25px;
     width: 100%;
@@ -76,7 +78,6 @@
     font-size: 18px;
     cursor: pointer;
   }
-
 </style>
 </head>
 
@@ -95,34 +96,19 @@
       <small style="display: block; margin-top: 5px; color: #555;">FARNO HAZLINA BINTI MUHAMMAD APANDI</small>
 
       <label>1️⃣ Select Depot</label>
-      <select id="depot" required>
-        <option value="">--Select Depot--</option>
-        <option value="Batu Caves">Batu Caves</option>
-        <option value="Cheras Selatan">Cheras Selatan</option>
-        <option value="Maluri">Maluri</option>
-      </select>
+      <select id="depot" required></select>
 
       <label>2️⃣ Select Route Number</label>
-      <select id="route" required>
-        <option value="">--Select Route--</option>
-      </select>
+      <select id="route" required></select>
 
       <label>3️⃣ Select Bus Stop</label>
-      <select id="busStop" required>
-        <option value="">--Select Bus Stop--</option>
-      </select>
+      <select id="busStop" required></select>
 
       <label>4️⃣ Direction</label>
       <input type="text" id="direction" disabled>
 
       <label>5️⃣ Bus Stop Condition</label>
-      <select id="condition" required>
-        <option value="">--Select Condition--</option>
-        <option>Covered Bus Stop</option>
-        <option>Pole Only</option>
-        <option>Layby</option>
-        <option>Non-Infrastructure</option>
-      </select>
+      <select id="condition" required></select>
 
       <label>6️⃣ Issue</label>
       <select id="issue" required>
@@ -170,7 +156,7 @@
 </div>
 
 <script>
-// ROUTE → BUS STOP → DIRECTION
+// ----------- ROUTE DATA -----------
 const routeBusStops = {
   "151": {
     "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
@@ -182,27 +168,31 @@ const routeBusStops = {
   }
 };
 
+// ----------- DEPOT DATA -----------
+document.getElementById("depot").innerHTML = `
+  <option value="">--Select Depot--</option>
+  <option value="Batu Caves">Batu Caves</option>
+  <option value="Cheras Selatan">Cheras Selatan</option>
+  <option value="Maluri">Maluri</option>
+`;
+
+// ----------- ROUTES BY DEPOT -----------
+const depotRoutes = {
+  "Batu Caves": ["151", "170"],
+  "Cheras Selatan": ["540"],
+  "Maluri": ["221"]
+};
+
 document.getElementById("depot").addEventListener("change", function () {
-  const depot = this.value;
   const routeSelect = document.getElementById("route");
   routeSelect.innerHTML = '<option value="">--Select Route--</option>';
 
-  const depotRoutes = {
-    "Batu Caves": ["151", "170", "171"],
-    "Cheras Selatan": ["540"],
-    "Maluri": ["221"]
-  };
-
-  if (depotRoutes[depot]) {
-    depotRoutes[depot].forEach(r => {
-      let opt = document.createElement("option");
-      opt.value = r;
-      opt.textContent = r;
-      routeSelect.appendChild(opt);
-    });
-  }
+  depotRoutes[this.value]?.forEach(r => {
+    routeSelect.innerHTML += `<option>${r}</option>`;
+  });
 });
 
+// ----------- BUS STOPS BY ROUTE -----------
 document.getElementById("route").addEventListener("change", function () {
   const route = this.value;
   const busStopSelect = document.getElementById("busStop");
@@ -210,74 +200,112 @@ document.getElementById("route").addEventListener("change", function () {
 
   if (routeBusStops[route]) {
     Object.keys(routeBusStops[route]).forEach(stop => {
-      let opt = document.createElement("option");
-      opt.value = stop;
-      opt.textContent = stop;
-      busStopSelect.appendChild(opt);
+      busStopSelect.innerHTML += `<option>${stop}</option>`;
     });
   }
 });
 
+// ----------- AUTO FILL DIRECTION -----------
 document.getElementById("busStop").addEventListener("change", function () {
   const route = document.getElementById("route").value;
-  const busStop = this.value;
-  if (routeBusStops[route] && routeBusStops[route][busStop]) {
-    document.getElementById("direction").value = routeBusStops[route][busStop];
+  const stop = this.value;
+
+  if (routeBusStops[route] && routeBusStops[route][stop]) {
+    document.getElementById("direction").value = routeBusStops[route][stop];
   }
 });
 
-// ✅ FULL AUTOFILL BASED ON TABLE IMAGE
+// ----------- AUTO FILL SUBCATEGORY + CATEGORY -----------
 document.getElementById("issue").addEventListener("change", function () {
-    const issue = this.value;
 
-    const mapping = {
-        "Construction in progress nearby the bus stop": {
-            subcat: "A2 - Pax",
-            cat: "A - Safety"
-        },
-        "Missing infrastructure": {
-            subcat: "B1 - Missing Pole",
-            cat: "B - Insufficient Infra"
-        },
-        "Covered by trees": {
-            subcat: "C1 - Routine",
-            cat: "C - Maintenance"
-        },
-        "Malfunction lights": {
-            subcat: "C2 - Infra",
-            cat: "C - Maintenance"
-        },
-        "Outdated info panel": {
-            subcat: "C2 - Infra",
-            cat: "C - Maintenance"
-        },
-        "No bus marking - shelter": {
-            subcat: "C3 - Bus Bay (Shelter)",
-            cat: "C - Maintenance"
-        },
-        "No bus marking - pole": {
-            subcat: "C4 - Bus Bay (Pole)",
-            cat: "C - Maintenance"
-        },
-        "No street lighting": {
-            subcat: "C5 - Street Lighting",
-            cat: "C - Maintenance"
-        },
-        "Parking issue": {
-            subcat: "D1 - Enforcement",
-            cat: "D - Enforcement"
-        }
-    };
+  const mapping = {
+    "Construction in progress nearby the bus stop": { subcat: "A2 - Pax", cat: "A - Safety" },
+    "Missing infrastructure": { subcat: "B1 - Missing Pole", cat: "B - Insufficient Infra" },
+    "Covered by trees": { subcat: "C1 - Routine", cat: "C - Maintenance" },
+    "Malfunction lights": { subcat: "C2 - Infra", cat: "C - Maintenance" },
+    "Outdated info panel": { subcat: "C2 - Infra", cat: "C - Maintenance" },
+    "No bus marking - shelter": { subcat: "C3 - Bus Bay (Shelter)", cat: "C - Maintenance" },
+    "No bus marking - pole": { subcat: "C4 - Bus Bay (Pole)", cat: "C - Maintenance" },
+    "No street lighting": { subcat: "C5 - Street Lighting", cat: "C - Maintenance" },
+    "Parking issue": { subcat: "D1 - Enforcement", cat: "D - Enforcement" }
+  };
 
-    if (mapping[issue]) {
-        document.getElementById("subcat1").value = mapping[issue].subcat;
-        document.getElementById("subcat2").value = mapping[issue].cat;
-    } else {
-        document.getElementById("subcat1").value = "";
-        document.getElementById("subcat2").value = "";
-    }
+  const selected = mapping[this.value];
+  document.getElementById("subcat1").value = selected?.subcat || "";
+  document.getElementById("subcat2").value = selected?.cat || "";
 });
 
+// ----------- CAMERA + FILE UPLOAD SYSTEM -----------
+const photoContainer = document.getElementById("photoContainer");
+const photos = [];
+
+for (let i = 0; i < 3; i++) {
+  const slot = document.createElement("div");
+  slot.className = "photo-slot";
+  slot.innerHTML = `
+    <p id="title${i}" class="upload-title">📸 Photo ${i+1}</p>
+
+    <video id="video${i}" class="hidden" autoplay></video>
+    <canvas id="canvas${i}" class="hidden"></canvas>
+
+    <input id="file${i}" type="file" accept="image/*" class="hidden">
+
+    <button type="button" id="cam${i}" class="btn-camera">📷 Take Photo</button>
+    <button type="button" id="upload${i}" class="btn-upload">📁 Upload File</button>
+  `;
+
+  photoContainer.appendChild(slot);
+
+  const fileInput = document.getElementById(`file${i}`);
+  const uploadBtn = document.getElementById(`upload${i}`);
+  const camBtn = document.getElementById(`cam${i}`);
+  const video = document.getElementById(`video${i}`);
+  const canvas = document.getElementById(`canvas${i}`);
+  const title = document.getElementById(`title${i}`);
+
+  // FILE UPLOAD
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    if (file) {
+      photos[i] = file;
+      title.textContent = "📷 Picture Selected";
+      title.style.color = "#0b2a78";
+    }
+  };
+
+  // CAMERA CAPTURE
+  camBtn.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+      video.classList.remove("hidden");
+      video.srcObject = stream;
+
+      camBtn.textContent = "📸 Capture Now";
+
+      camBtn.onclick = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
+          title.textContent = "📷 Photo Captured";
+          title.style.color = "#0b2a78";
+        });
+
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.classList.add("hidden");
+        camBtn.textContent = "📷 Take Photo";
+      };
+
+    } catch (err) {
+      alert("Camera blocked or not available.");
+    }
+  };
+}
 </script>
 
 </body>
