@@ -53,7 +53,6 @@
     font-size: 15px;
   }
 
-  /* DOTTED UPLOAD BOX */
   .photo-slot {
     width: 100%;
     border: 2px dashed #2ecc71;
@@ -65,32 +64,6 @@
   }
 
   .photo-slot:hover { background: #edffed; }
-
-  .upload-title {
-    text-align: center;
-    color: #1a8c3a;
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-
-  .controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .controls button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-    font-size: 14px;
-  }
-
-  .btn-camera { background: #e67e22; }
-  .btn-upload { background: #2980b9; }
-  .hidden { display: none; }
 
   button.submit-btn {
     margin-top: 25px;
@@ -139,7 +112,6 @@
         <option value="">--Select Bus Stop--</option>
       </select>
 
-      <!-- 4️⃣ Direction (Auto-filled after bus stop selection) -->
       <label>4️⃣ Direction</label>
       <input type="text" id="direction" disabled>
 
@@ -152,7 +124,6 @@
         <option>Non-Infrastructure</option>
       </select>
 
-      <!-- 6️⃣ Issue -->
       <label>6️⃣ Issue</label>
       <select id="issue" required>
         <option value="">--Select Issue--</option>
@@ -167,7 +138,6 @@
         <option>Parking issue</option>
       </select>
 
-      <!-- 7️⃣ Subcategory -->
       <label>7️⃣ Subcategory</label>
       <select id="subcat1" required>
         <option value="">--Select Subcategory--</option>
@@ -181,7 +151,6 @@
         <option>D1 - Enforcement</option>
       </select>
 
-      <!-- 8️⃣ Category -->
       <label>8️⃣ Category</label>
       <select id="subcat2" required>
         <option value="">--Select Category--</option>
@@ -191,7 +160,7 @@
         <option>D - Enforcement</option>
       </select>
 
-      <label>📸 Upload Pictures (Camera / File)</label>
+      <label>📸 Upload Pictures</label>
       <div id="photoContainer"></div>
 
       <button type="submit" class="submit-btn">Send</button>
@@ -201,185 +170,112 @@
 </div>
 
 <script>
-// Map of Route and Bus Stops to Directions
+// ROUTE → BUS STOP → DIRECTION
 const routeBusStops = {
   "151": {
     "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
-    "SL287 STADIUM MPS (BARAT)": "A-B",
-    "SL288 BULATAN BERINGIN SELAYANG": "A-B",
-    "SL289 TAMAN SELAYANG SEGAR": "A-B",
-    "SL290 TAMAN SELAYANG INDAH": "A-B",
-    "SL37 SELAYANG BARU (BARAT)": "A-B",
-    "SL536 SELAYANG BARU (UTARA)": "A-B",
-    "SL43 PERUMAHAN SELAYANG BARU": "A-B",
-    "SL44 BALAI POLIS SELAYANG BARU (OPP)": "A-B",
-    "SL34 GIANT SELAYANG": "A-B",
-    "SL538 POS MALAYSIA SELAYANG": "A-B",
-    "SL539 FLAT PASAR BORONG": "A-B",
-    "KL840 TAMAN SRI SELAYANG": "A-B",
-    "KL1498 KOMERSIAL KIP (OPP)": "A-B",
-    "(M) KL1505 KTM TAMAN WAHYU": "A-B",
-    "KL588 TAMAN KOK LIAN/ PPR PEKAN BATU": "A-B",
-    "KL598 SK KAMPUNG BATU": "A-B",
-    "KL599 TAMAN IMPIAN": "A-B",
-    "KL600 BATU KENTOMEN": "A-B",
-    "KL601 TAMAN RAINBOW": "A-B",
-    "KL602 TAMAN KAYA": "A-B",
-    "KL1578 MRT JALAN IPOH PINTU B": "A-B",
-    "KL603 SMK (P) JLN IPOH (OPP)": "A-B",
-    "KL604 BATU COMPLEX BUSINESS CENTRE": "A-B",
-    "KL605 TAMAN MILLION": "A-B",
-    "(M) KL606 RIVERWALK VILLAGE": "A-B",
-    "KL607 MRT SENTUL BARAT PINTU C": "A-B",
-    "KL608 HOTEL TROPICANA": "A-B",
-    "KL609 SMK SENTUL UTAMA": "A-B",
-    "KL2249 PERKIM": "A-B",
-    "KL50 DAMAI HOSPITAL": "A-B",
-    "(M) KL52 MONORAIL CHOWKIT": "A-B",
-    "KL69 PASAR CHOW KIT": "A-B",
-    "KL70 SRI AMAR": "A-B",
-    "KL71 KOMERSIAL TAR": "A-B",
-    "KL35 MAJU JUNCTION": "A-B",
-    "KL36 KOMPLEKS PERTAMA": "A-B",
-    "KL37 GLOBE KL": "A-B",
-    "KL38 COLISEUM": "A-B",
-    "KL114 DATARAN MERDEKA": "A-B",
-    "KL1934 MUZIUM TEKSTIL NEGARA": "A-B",
-    "KL103 MAYBANK": "A-B",
-    "KL113 HAB LEBUH PUDU": "B-A",
-    "KL1939 MEDAN PASAR": "B-A",
-    "KL117 BSN LEBUH AMPANG": "B-A",
-    "KL30 AMANAHRAYA": "B-A",
-    "(M) KL31 HENTIAN MUNSHI ABDULLAH": "B-A",
-    "(M) KL32 CAPSQUARE": "B-A",
-    "(M) KL1940 SOGO KL": "B-A",
-    "KL40 MEDAN MARA": "B-A",
-    "KL41 LRT SULTAN ISMAIL/WISMA SIME DARBY": "B-A",
-    "KL42 EDC HOTEL": "B-A",
-    "KL46 CHOWKIT/KFC (BARAT)": "B-A",
-    "KL47 DAMAI HOSPITAL (OPP)": "B-A",
-    "KL49 PERKIM/PUSRAWI": "B-A",
-    "KL578 TAMAN GOLDEN": "B-A",
-    "KL579 SK SRI DHANDAYUTHAPANI": "B-A",
-    "(M) KL1580 MRT SENTUL BARAT PINTU B": "B-A",
-    "KL580 RIVERCITY 3RD MILE": "B-A",
-    "KL581 BATU COMPLEX BUSINESS CENTRE": "B-A",
-    "KL583 SMK (P) JLN IPOH": "B-A",
-    "KL584 KOMPLEKS MUTIARA": "B-A"
+    "SL287 STADIUM MPS (BARAT)": "A-B"
   },
   "170": {
     "SL294 HAB WIRA DAMAI": "A-B",
-    "SL182 PANGSAPURI KENANGA": "A-B",
-    "SL183 PANGSAPURI CEMPAKA": "A-B",
-    "SL184 KG MELAYU WIRA DAMAI": "A-B",
-    "SL309 PANGSAPURI SAUJANA GOMBAK": "A-B",
-    "SL185 PINGGIRAN BT CAVES (SELATAN)": "A-B",
-    "SL786 MEDAN SELERA PINGGIRAN": "A-B",
-    "SL189 MEDAN SELERA PINGGIRAN": "A-B",
-    "SL191 PINGGIRAN BT CAVES (SELATAN)": "A-B",
-    "SL192 FLAT TAMAN PINGGIRAN": "A-B",
-    "SL205 SK TAMAN SERI GOMBAK 2 (OPP)": "A-B",
-    "SL207 DEWAN BERINGIN GOMBAK (OPP)": "A-B",
-    "SL506 TAMAN PRIMA SRI GOMBAK": "A-B",
-    "SL470 MASJID AR-RAHIMAH": "A-B",
-    "SL471 SRA RAKYAT DARUL MUJAHIDIN": "A-B",
-    "KL1796 TAMAN KOPERASI POLIS 1": "A-B",
-    "(M) KL1794 TAMAN PELANGI": "A-B",
-    "KL989 KG CHUBADAK HULU (SELATAN)": "A-B",
-    "KL991 KG CHUBADAK TAMBAHAN": "A-B",
-    "KL642 SJKC PENG MING": "A-B",
-    "KL2063 SPG DATO SENU": "A-B",
-    "KL643 MASJID AL-HIDAYAH SENTUL": "A-B",
-    "KL644 PANGSAPURI SENTUL UTARA": "A-B",
-    "PASAR SENTUL (OPP)": "A-B",
-    "KL2064 SMK CONVENT SENTUL (OPP)": "A-B",
-    "KL645 SENTUL BOULEVARD (UTARA)": "A-B",
-    "KL647 FENNEL SENTUL": "A-B",
-    "KL2065 CAPERS SENTUL": "A-B",
-    "D6 SENTUL": "A-B",
-    "KL665 SJKC SENTUL KL": "A-B",
-    "KL666 PERUMAHAN AWAM SERI TERENGGANU": "B-A",
-    "(M) KL667 MRT TITIWANGSA": "B-A",
-    "KL668 HOSPITAL TAWAKAL": "B-A",
-    "KL2500 MASJID AMRU SENTUL": "B-A",
-    "KL652 MAKPEM": "B-A",
-    "KL2051 WISMA HEALTH LANE": "B-A",
-    "KL2052 SMK LA SALLE": "B-A",
-    "D7 SENTUL": "B-A",
-    "KL613 SENTUL BOULEVARD (BARAT)": "B-A",
-    "KL615 SMK CONVENT SENTUL": "B-A",
-    "KL616 PASAR SENTUL": "B-A",
-    "KL617 SK SENTUL 2": "B-A"
-  },
-  "171": {
-    "SL294 HAB WIRA DAMAI": "A-B",
-    "SL182 PANGSAPURI KENANGA": "A-B",
-    "SL183 PANGSAPURI CEMPAKA": "A-B",
-    // Add other stops for Route 171 here
+    "SL182 PANGSAPURI KENANGA": "A-B"
   }
 };
 
-document.getElementById("depot").addEventListener("change", function() {
+document.getElementById("depot").addEventListener("change", function () {
   const depot = this.value;
   const routeSelect = document.getElementById("route");
-
-  // Clear the current options
   routeSelect.innerHTML = '<option value="">--Select Route--</option>';
 
-  // Populate routes based on selected depot
-  if (depot === "Batu Caves") {
-    const routes = ["151", "170", "171"];
-    routes.forEach(route => {
-      const option = document.createElement("option");
-      option.value = route;
-      option.textContent = route;
-      routeSelect.appendChild(option);
-    });
-  } else if (depot === "Cheras Selatan") {
-    const routes = ["540"];
-    routes.forEach(route => {
-      const option = document.createElement("option");
-      option.value = route;
-      option.textContent = route;
-      routeSelect.appendChild(option);
-    });
-  } else if (depot === "Maluri") {
-    const routes = ["221"];
-    routes.forEach(route => {
-      const option = document.createElement("option");
-      option.value = route;
-      option.textContent = route;
-      routeSelect.appendChild(option);
+  const depotRoutes = {
+    "Batu Caves": ["151", "170", "171"],
+    "Cheras Selatan": ["540"],
+    "Maluri": ["221"]
+  };
+
+  if (depotRoutes[depot]) {
+    depotRoutes[depot].forEach(r => {
+      let opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = r;
+      routeSelect.appendChild(opt);
     });
   }
 });
 
-document.getElementById("route").addEventListener("change", function() {
+document.getElementById("route").addEventListener("change", function () {
   const route = this.value;
   const busStopSelect = document.getElementById("busStop");
-
-  // Clear the current options
   busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
 
   if (routeBusStops[route]) {
-    for (let stop in routeBusStops[route]) {
-      const option = document.createElement("option");
-      option.value = stop;
-      option.textContent = stop;
-      busStopSelect.appendChild(option);
-    }
+    Object.keys(routeBusStops[route]).forEach(stop => {
+      let opt = document.createElement("option");
+      opt.value = stop;
+      opt.textContent = stop;
+      busStopSelect.appendChild(opt);
+    });
   }
 });
 
-document.getElementById("busStop").addEventListener("change", function() {
+document.getElementById("busStop").addEventListener("change", function () {
   const route = document.getElementById("route").value;
   const busStop = this.value;
-  const directionInput = document.getElementById("direction");
-
-  // Auto-fill direction based on selected route and bus stop
   if (routeBusStops[route] && routeBusStops[route][busStop]) {
-    directionInput.value = routeBusStops[route][busStop]; // Auto-fill direction field
+    document.getElementById("direction").value = routeBusStops[route][busStop];
   }
+});
+
+// ✅ FULL AUTOFILL BASED ON TABLE IMAGE
+document.getElementById("issue").addEventListener("change", function () {
+    const issue = this.value;
+
+    const mapping = {
+        "Construction in progress nearby the bus stop": {
+            subcat: "A2 - Pax",
+            cat: "A - Safety"
+        },
+        "Missing infrastructure": {
+            subcat: "B1 - Missing Pole",
+            cat: "B - Insufficient Infra"
+        },
+        "Covered by trees": {
+            subcat: "C1 - Routine",
+            cat: "C - Maintenance"
+        },
+        "Malfunction lights": {
+            subcat: "C2 - Infra",
+            cat: "C - Maintenance"
+        },
+        "Outdated info panel": {
+            subcat: "C2 - Infra",
+            cat: "C - Maintenance"
+        },
+        "No bus marking - shelter": {
+            subcat: "C3 - Bus Bay (Shelter)",
+            cat: "C - Maintenance"
+        },
+        "No bus marking - pole": {
+            subcat: "C4 - Bus Bay (Pole)",
+            cat: "C - Maintenance"
+        },
+        "No street lighting": {
+            subcat: "C5 - Street Lighting",
+            cat: "C - Maintenance"
+        },
+        "Parking issue": {
+            subcat: "D1 - Enforcement",
+            cat: "D - Enforcement"
+        }
+    };
+
+    if (mapping[issue]) {
+        document.getElementById("subcat1").value = mapping[issue].subcat;
+        document.getElementById("subcat2").value = mapping[issue].cat;
+    } else {
+        document.getElementById("subcat1").value = "";
+        document.getElementById("subcat2").value = "";
+    }
 });
 
 </script>
