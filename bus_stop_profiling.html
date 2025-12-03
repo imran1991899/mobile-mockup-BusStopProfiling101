@@ -137,15 +137,12 @@
       <label>3️⃣ Select Bus Stop</label>
       <select id="busStop" required>
         <option value="">--Select Bus Stop--</option>
-        <option>(M) AJ108 AMPANG POINT (OPP)</option>
       </select>
 
-      <!-- 4️⃣ Direction -->
+      <!-- 4️⃣ Direction (Auto-filled after bus stop selection) -->
       <label>4️⃣ Direction</label>
       <select id="direction" required>
         <option value="">--Select Direction--</option>
-        <option>A-B</option>
-        <option>B-A</option>
       </select>
 
       <label>5️⃣ Bus Stop Condition</label>
@@ -206,19 +203,39 @@
 </div>
 
 <script>
-// Mapping Depot to Routes
-const depotRoutes = {
-  "Batu Caves": [
-    "151", "170", "171", "172", "173", "180", "190", "191", "200", "201", 
-    "202", "220", "222", "250", "251", "253"
-  ],
-  "Cheras Selatan": [
-    "540", "541", "551", "570", "580", "581", "590", "600", "602", "640", 
-    "641", "650", "651", "652"
-  ],
-  "Maluri": [
-    "221", "300", "301", "303", "402", "420", "421"
-  ]
+// Mapping Depot to Routes and Bus Stops
+const depotRoutesStops = {
+  "Batu Caves": {
+    "151": [
+      { stop: "SL283 DATARAN BANDAR BARU SELAYANG", direction: "A-B" },
+      { stop: "SL287 STADIUM MPS (BARAT)", direction: "A-B" },
+      { stop: "SL288 BULATAN BERINGIN SELAYANG", direction: "A-B" },
+      { stop: "SL289 TAMAN SELAYANG SEGAR", direction: "A-B" },
+      { stop: "SL290 TAMAN SELAYANG INDAH", direction: "A-B" },
+      // ... (more stops for Route 151)
+    ],
+    "170": [
+      { stop: "SL294 HAB WIRA DAMAI", direction: "A-B" },
+      { stop: "SL182 PANGSAPURI KENANGA", direction: "A-B" },
+      // ... (more stops for Route 170)
+    ],
+    // Add other routes for Batu Caves
+  },
+  "Cheras Selatan": {
+    "540": [
+      { stop: "SL294 HAB WIRA DAMAI", direction: "A-B" },
+      { stop: "SL182 PANGSAPURI KENANGA", direction: "A-B" },
+      // ... (more stops for Route 540)
+    ],
+    // Add more routes for Cheras Selatan
+  },
+  "Maluri": {
+    "221": [
+      { stop: "SL294 HAB WIRA DAMAI", direction: "A-B" },
+      // Add more stops for Maluri routes
+    ],
+    // Add more routes for Maluri
+  }
 };
 
 // Event listener for Depot selection to update Route dropdown
@@ -230,93 +247,55 @@ document.getElementById("depot").addEventListener("change", function() {
   routeSelect.innerHTML = '<option value="">--Select Route--</option>';
 
   // Populate routes based on selected depot
-  if (depotRoutes[depot]) {
-    depotRoutes[depot].forEach(route => {
+  if (depotRoutesStops[depot]) {
+    for (let route in depotRoutesStops[depot]) {
       const option = document.createElement("option");
       option.value = route;
       option.textContent = route;
       routeSelect.appendChild(option);
+    }
+  }
+});
+
+// Event listener for Route selection to populate Bus Stops
+document.getElementById("route").addEventListener("change", function() {
+  const depot = document.getElementById("depot").value;
+  const route = this.value;
+  const busStopSelect = document.getElementById("busStop");
+
+  // Clear the current options
+  busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
+
+  if (depotRoutesStops[depot] && depotRoutesStops[depot][route]) {
+    depotRoutesStops[depot][route].forEach(stop => {
+      const option = document.createElement("option");
+      option.value = stop.stop;
+      option.textContent = stop.stop;
+      busStopSelect.appendChild(option);
     });
   }
 });
 
-/* ----------------------------------
-   BUILD 3 PHOTO SLOTS
----------------------------------- */
-const maxPhotos = 3;
-const photoContainer = document.getElementById("photoContainer");
-let photos = [null, null, null];
+// Event listener for Bus Stop selection to fill Direction
+document.getElementById("busStop").addEventListener("change", function() {
+  const depot = document.getElementById("depot").value;
+  const route = document.getElementById("route").value;
+  const busStop = this.value;
+  const directionSelect = document.getElementById("direction");
 
-for (let i = 0; i < maxPhotos; i++) {
+  // Clear the current direction
+  directionSelect.innerHTML = '<option value="">--Select Direction--</option>';
 
-  const slot = document.createElement("div");
-  slot.className = "photo-slot";
-
-  slot.innerHTML = `
-    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
-
-    <div class="controls">
-      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
-      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
-    </div>
-
-    <input type="file" id="file${i}" accept="image/*" class="hidden">
-    <video id="video${i}" class="hidden" autoplay playsinline></video>
-    <canvas id="canvas${i}" class="hidden"></canvas>
-  `;
-
-  photoContainer.appendChild(slot);
-
-  const fileInput = document.getElementById(`file${i}`);
-  const uploadBtn = document.getElementById(`upload${i}`);
-  const camBtn = document.getElementById(`cam${i}`);
-  const video = document.getElementById(`video${i}`);
-  const canvas = document.getElementById(`canvas${i}`);
-  const title = document.getElementById(`title${i}`);
-
-  /* FILE UPLOAD */
-  uploadBtn.onclick = () => fileInput.click();
-
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    if (file) {
-      photos[i] = file;
-      title.textContent = "📷 Picture Selected";
-      title.style.color = "#0b2a78";
+  if (depotRoutesStops[depot] && depotRoutesStops[depot][route]) {
+    const selectedStop = depotRoutesStops[depot][route].find(stop => stop.stop === busStop);
+    if (selectedStop) {
+      const option = document.createElement("option");
+      option.value = selectedStop.direction;
+      option.textContent = selectedStop.direction;
+      directionSelect.appendChild(option);
     }
-  };
-
-  /* CAMERA CAPTURE */
-  camBtn.onclick = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-      video.classList.remove("hidden");
-      video.srcObject = stream;
-
-      camBtn.textContent = "📸 Capture Now";
-
-      camBtn.onclick = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-
-        canvas.toBlob((blob) => {
-          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
-          title.textContent = "📷 Photo Captured";
-          title.style.color = "#0b2a78";
-        });
-
-        video.srcObject.getTracks().forEach(t => t.stop());
-        video.classList.add("hidden");
-        camBtn.textContent = "📷 Take Photo";
-      };
-
-    } catch (err) {
-      alert("Camera blocked or not available.");
-    }
-  };
-}
+  }
+});
 
 /* ----------------------------------
    FORM SUBMIT + PARTIAL RESET
@@ -343,29 +322,18 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
     return;
   }
 
-  const uploaded = photos.filter(p => p !== null);
-  if(uploaded.length < 1){
-    alert("⚠️ Upload at least 1 picture.");
-    return;
-  }
-
   alert("✅ Submitted successfully!");
-
-  // Reset BUT KEEP staffId, depot, route
+  
+  // Reset but keep some values
   document.getElementById("busStop").value = "";
+  document.getElementById("route").value = "";
+  document.getElementById("depot").value = "";
   document.getElementById("condition").value = "";
   document.getElementById("issue").value = "";
   document.getElementById("direction").value = "";
   document.getElementById("subcat1").value = "";
   document.getElementById("subcat2").value = "";
 
-  photos = [null, null, null];
-
-  for (let i = 0; i < maxPhotos; i++) {
-    document.getElementById(`title${i}`).textContent = `Upload Picture ${i+1}`;
-    document.getElementById(`title${i}`).style.color = "#1a8c3a";
-    document.getElementById(`file${i}`).value = "";
-  }
 });
 </script>
 
