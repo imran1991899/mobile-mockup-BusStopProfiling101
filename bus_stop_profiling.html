@@ -15,7 +15,6 @@
     justify-content: center;
   }
 
-  /* MAIN CARD CONTAINER */
   .page-wrapper {
     width: 420px;
     height: 100vh;
@@ -26,7 +25,6 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
 
-  /* HEADER */
   .header {
     background: #0b2a78;
     padding: 22px;
@@ -36,9 +34,7 @@
     border-radius: 30px 30px 0 0;
   }
 
-  .content {
-    padding: 25px;
-  }
+  .content { padding: 25px; }
 
   label {
     display: block;
@@ -48,41 +44,53 @@
     color: #111;
   }
 
-  input[type="text"], select, textarea {
+  input[type="text"], select {
     width: 100%;
     padding: 12px;
     margin-top: 8px;
     border-radius: 10px;
     border: 1px solid #c9c9c9;
     font-size: 15px;
-    box-sizing: border-box;
   }
 
-  /* DOTTED UPLOAD BOXES */
+  /* DOTTED UPLOAD BOX */
   .photo-slot {
     width: 100%;
-    height: 110px;
     border: 2px dashed #2ecc71;
     border-radius: 14px;
+    padding: 12px;
     margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #1a8c3a;
-    font-size: 16px;
-    cursor: pointer;
     background: #f8fff8;
     transition: 0.2s;
+  }
+
+  .photo-slot:hover { background: #edffed; }
+
+  .upload-title {
     text-align: center;
+    color: #1a8c3a;
+    font-size: 16px;
+    margin-bottom: 10px;
   }
 
-  .photo-slot:hover {
-    background: #edffed;
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
   }
 
-  .hidden {
-    display: none;
+  .controls button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
   }
+
+  .btn-camera { background: #e67e22; }
+  .btn-upload { background: #2980b9; }
+  .hidden { display: none; }
 
   button.submit-btn {
     margin-top: 25px;
@@ -96,9 +104,6 @@
     cursor: pointer;
   }
 
-  button.submit-btn:hover {
-    background-color: #093b9d;
-  }
 </style>
 </head>
 
@@ -109,33 +114,28 @@
   <div class="header">Bus Stop Profiling</div>
 
   <div class="content">
-    <form id="profilingForm">
 
+    <form id="profilingForm">
+      
       <label>👤 Staff ID (8 digits)</label>
-      <input type="text" id="staffId" maxlength="8" required placeholder="Enter Staff ID">
+      <input type="text" id="staffId" maxlength="8" required>
 
       <label>1️⃣ Select Depot</label>
       <select id="depot" required>
         <option value="">--Select Depot--</option>
         <option>(OS) Batu Caves</option>
-        <option>(OS) Cheras Selatan</option>
-        <option>(OS) Maluri</option>
-        <option>(OS) Shah Alam</option>
       </select>
 
       <label>2️⃣ Select Route Number</label>
       <select id="route" required>
         <option value="">--Select Route--</option>
         <option>100</option>
-        <option>101</option>
-        <option>102</option>
       </select>
 
       <label>3️⃣ Select Bus Stop</label>
       <select id="busStop" required>
         <option value="">--Select Bus Stop--</option>
         <option>(M) AJ108 AMPANG POINT (OPP)</option>
-        <option>(M) AJ16 TRANSFORMER (OPP)</option>
       </select>
 
       <label>4️⃣ Bus Stop Condition</label>
@@ -144,65 +144,107 @@
         <option>Covered Bus Stop</option>
         <option>Pole Only</option>
         <option>Layby</option>
-        <option>Non-Infrastructure</option>
       </select>
 
-      <label>📸 Upload Pictures (Min 1)</label>
+      <label>📸 Upload Pictures (Camera / File)</label>
       <div id="photoContainer"></div>
 
       <button type="submit" class="submit-btn">Send</button>
     </form>
-  </div>
 
+  </div>
 </div>
 
 <script>
-/* -------------------------------
-   PHOTO UPLOADER LOGIC
--------------------------------- */
+/* ----------------------------------
+   BUILD 3 PHOTO SLOTS
+---------------------------------- */
 const maxPhotos = 3;
-const photoContainer = document.getElementById('photoContainer');
+const photoContainer = document.getElementById("photoContainer");
 let photos = [null, null, null];
 
-// Build photo slots
 for (let i = 0; i < maxPhotos; i++) {
-  const slot = document.createElement('div');
-  slot.className = 'photo-slot';
-  slot.textContent = "Upload Picture " + (i + 1);
 
-  const fileInput = document.createElement('input');
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-  fileInput.classList.add("hidden");
+  const slot = document.createElement("div");
+  slot.className = "photo-slot";
 
-  slot.appendChild(fileInput);
+  slot.innerHTML = `
+    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
 
-  slot.addEventListener('click', () => fileInput.click());
+    <div class="controls">
+      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
+      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
+    </div>
 
-  fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) {
-      photos[i] = file;
-      slot.textContent = "📷 Picture Selected";
-      slot.style.color = "#0b2a78";
-      slot.style.borderColor = "#0b2a78";
-    }
-  });
+    <input type="file" id="file${i}" accept="image/*" class="hidden">
+    <video id="video${i}" class="hidden" autoplay playsinline></video>
+    <canvas id="canvas${i}" class="hidden"></canvas>
+  `;
 
   photoContainer.appendChild(slot);
+
+  const fileInput = document.getElementById(`file${i}`);
+  const uploadBtn = document.getElementById(`upload${i}`);
+  const camBtn = document.getElementById(`cam${i}`);
+  const video = document.getElementById(`video${i}`);
+  const canvas = document.getElementById(`canvas${i}`);
+  const title = document.getElementById(`title${i}`);
+
+  /* FILE UPLOAD */
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    if (file) {
+      photos[i] = file;
+      title.textContent = "📷 Picture Selected";
+      title.style.color = "#0b2a78";
+    }
+  };
+
+  /* CAMERA CAPTURE */
+  camBtn.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+      video.classList.remove("hidden");
+      video.srcObject = stream;
+
+      camBtn.textContent = "📸 Capture Now";
+
+      camBtn.onclick = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
+          title.textContent = "📷 Photo Captured";
+          title.style.color = "#0b2a78";
+        });
+
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.classList.add("hidden");
+        camBtn.textContent = "📷 Take Photo";
+      };
+
+    } catch (err) {
+      alert("Camera blocked or not available.");
+    }
+  };
 }
 
-/* -------------------------------
+/* ----------------------------------
    FORM SUBMIT + PARTIAL RESET
--------------------------------- */
-document.getElementById('profilingForm').addEventListener('submit', function(e){
+---------------------------------- */
+document.getElementById("profilingForm").addEventListener("submit", function(e){
   e.preventDefault();
 
-  const staffId = document.getElementById('staffId').value.trim();
-  const depot = document.getElementById('depot').value.trim();
-  const route = document.getElementById('route').value.trim();
-  const busStop = document.getElementById('busStop').value.trim();
-  const condition = document.getElementById('condition').value;
+  const staffId = document.getElementById("staffId").value.trim();
+  const depot = document.getElementById("depot").value.trim();
+  const route = document.getElementById("route").value.trim();
+  const busStop = document.getElementById("busStop").value.trim();
+  const condition = document.getElementById("condition").value;
 
   if(!/^\d{8}$/.test(staffId)){
     alert("⚠️ Staff ID must be exactly 8 digits.");
@@ -213,40 +255,25 @@ document.getElementById('profilingForm').addEventListener('submit', function(e){
     return;
   }
 
-  const uploadedPhotos = photos.filter(p => p !== null);
-  if(uploadedPhotos.length < 1){
-    alert("⚠️ Please upload at least 1 photo.");
+  const uploaded = photos.filter(p => p !== null);
+  if(uploaded.length < 1){
+    alert("⚠️ Upload at least 1 picture.");
     return;
   }
 
-  alert("✅ Survey Submitted Successfully!");
+  alert("✅ Submitted successfully!");
 
-  /* ------------------------------------
-     RESET ONLY SELECTED FIELDS
-     ------------------------------------ */
+  // Reset BUT KEEP staffId, depot, route
+  document.getElementById("busStop").value = "";
+  document.getElementById("condition").value = "";
 
-  // Reset bus stop
-  document.getElementById('busStop').value = "";
-
-  // Reset condition
-  document.getElementById('condition').value = "";
-
-  // Reset photo data
   photos = [null, null, null];
 
-  // Reset slot UI
-  const slots = document.querySelectorAll('.photo-slot');
-  slots.forEach((slot, index) => {
-    slot.textContent = "Upload Picture " + (index + 1);
-    slot.style.color = "#1a8c3a";
-    slot.style.borderColor = "#2ecc71";
-
-    const fileInput = slot.querySelector("input");
-    fileInput.value = "";
-  });
-
-  // Optional: Scroll back to top
-  document.querySelector('.page-wrapper').scrollTo({ top: 0, behavior: "smooth" });
+  for (let i = 0; i < maxPhotos; i++) {
+    document.getElementById(`title${i}`).textContent = `Upload Picture ${i+1}`;
+    document.getElementById(`title${i}`).style.color = "#1a8c3a";
+    document.getElementById(`file${i}`).value = "";
+  }
 });
 </script>
 
