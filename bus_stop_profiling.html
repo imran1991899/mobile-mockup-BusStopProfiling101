@@ -15,7 +15,7 @@
     justify-content: center;
   }
 
-  /* MAIN CARD CONTAINER (MATCHES YOUR NEW SCREENSHOT) */
+  /* MAIN CARD CONTAINER */
   .page-wrapper {
     width: 420px;
     height: 100vh;
@@ -26,7 +26,7 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
 
-  /* TOP HEADER */
+  /* HEADER */
   .header {
     background: #0b2a78;
     padding: 22px;
@@ -56,15 +56,6 @@
     border: 1px solid #c9c9c9;
     font-size: 15px;
     box-sizing: border-box;
-  }
-
-  textarea {
-    height: 100px;
-    resize: none;
-  }
-
-  .photo-upload {
-    margin-top: 12px;
   }
 
   /* DOTTED UPLOAD BOXES */
@@ -127,18 +118,24 @@
       <select id="depot" required>
         <option value="">--Select Depot--</option>
         <option>(OS) Batu Caves</option>
+        <option>(OS) Cheras Selatan</option>
+        <option>(OS) Maluri</option>
+        <option>(OS) Shah Alam</option>
       </select>
 
       <label>2️⃣ Select Route Number</label>
       <select id="route" required>
         <option value="">--Select Route--</option>
         <option>100</option>
+        <option>101</option>
+        <option>102</option>
       </select>
 
       <label>3️⃣ Select Bus Stop</label>
       <select id="busStop" required>
         <option value="">--Select Bus Stop--</option>
         <option>(M) AJ108 AMPANG POINT (OPP)</option>
+        <option>(M) AJ16 TRANSFORMER (OPP)</option>
       </select>
 
       <label>4️⃣ Bus Stop Condition</label>
@@ -160,11 +157,14 @@
 </div>
 
 <script>
-/* SAME JAVASCRIPT LOGIC EXACTLY AS BEFORE */
+/* -------------------------------
+   PHOTO UPLOADER LOGIC
+-------------------------------- */
 const maxPhotos = 3;
 const photoContainer = document.getElementById('photoContainer');
 let photos = [null, null, null];
 
+// Build photo slots
 for (let i = 0; i < maxPhotos; i++) {
   const slot = document.createElement('div');
   slot.className = 'photo-slot';
@@ -192,8 +192,12 @@ for (let i = 0; i < maxPhotos; i++) {
   photoContainer.appendChild(slot);
 }
 
+/* -------------------------------
+   FORM SUBMIT + PARTIAL RESET
+-------------------------------- */
 document.getElementById('profilingForm').addEventListener('submit', function(e){
   e.preventDefault();
+
   const staffId = document.getElementById('staffId').value.trim();
   const depot = document.getElementById('depot').value.trim();
   const route = document.getElementById('route').value.trim();
@@ -216,6 +220,33 @@ document.getElementById('profilingForm').addEventListener('submit', function(e){
   }
 
   alert("✅ Survey Submitted Successfully!");
+
+  /* ------------------------------------
+     RESET ONLY SELECTED FIELDS
+     ------------------------------------ */
+
+  // Reset bus stop
+  document.getElementById('busStop').value = "";
+
+  // Reset condition
+  document.getElementById('condition').value = "";
+
+  // Reset photo data
+  photos = [null, null, null];
+
+  // Reset slot UI
+  const slots = document.querySelectorAll('.photo-slot');
+  slots.forEach((slot, index) => {
+    slot.textContent = "Upload Picture " + (index + 1);
+    slot.style.color = "#1a8c3a";
+    slot.style.borderColor = "#2ecc71";
+
+    const fileInput = slot.querySelector("input");
+    fileInput.value = "";
+  });
+
+  // Optional: Scroll back to top
+  document.querySelector('.page-wrapper').scrollTo({ top: 0, behavior: "smooth" });
 });
 </script>
 
