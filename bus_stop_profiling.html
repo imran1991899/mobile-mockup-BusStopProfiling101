@@ -1,82 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bus Stop Profiling</title>
-    <style>
-        body {
-            margin: 0; background: #f1f4ff;
-            font-family: Arial, sans-serif;
-        }
-        .mobile {
-            width: 375px; margin: auto; min-height: 100vh;
-            background: white; border-radius: 25px;
-            overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.15);
-        }
-        .header {
-            background: #0b2a78;
-            color: white; padding: 20px;
-            font-size: 20px; font-weight: bold;
-        }
-        .container {
-            padding: 20px;
-        }
-        label {
-            font-weight: bold; font-size: 14px;
-        }
-        input, textarea {
-            width: 100%; padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            margin-top: 5px; margin-bottom: 20px;
-        }
-        .upload-box {
-            width: 100%; height: 80px;
-            border: 2px dashed #00c26a;
-            border-radius: 12px;
-            display: flex; justify-content: center;
-            align-items: center;
-            color: #00c26a; font-size: 14px;
-            margin-bottom: 15px;
-        }
-        button {
-            width: 100%; padding: 15px;
-            background: #00c26a; border: none;
-            color: white; border-radius: 12px;
-            font-size: 18px; cursor: pointer;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bus Stop Profiling</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f4ff;
+  }
+  .mobile {
+    max-width: 375px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    min-height: 700px;
+  }
+  .header {
+    background: #0b2a78;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 20px;
+    text-align: center;
+  }
+  .container {
+    padding: 20px;
+  }
+  label {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+  }
+  .upload-box {
+    width: 100%;
+    height: 80px;
+    border: 2px dashed #00c26a;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #00c26a;
+    font-size: 14px;
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+  button {
+    width: 100%;
+    padding: 15px;
+    background: #00c26a;
+    border: none;
+    color: white;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+</style>
 </head>
-
 <body>
-<div class="mobile">
-
+  <div class="mobile">
     <div class="header">Bus Stop Profiling</div>
-
     <div class="container">
+      <label for="depoh">Add Depoh</label>
+      <input type="text" id="depoh" name="depoh" placeholder="Enter Depoh" />
 
-        <label>Add Depoh</label>
-        <input type="text" placeholder="Enter Depoh">
+      <label for="location">Bus Stop Location</label>
+      <input type="text" id="location" name="location" placeholder="Enter Bus Stop Location" />
 
-        <label>Bus Stop Location</label>
-        <input type="text" placeholder="Enter Bus Stop Location">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" placeholder="Enter Description"></textarea>
 
-        <label>Description</label>
-        <textarea rows="4" placeholder="Enter Description"></textarea>
+      <label>Upload Pictures (Min 5)</label>
+      <div class="upload-box" tabindex="0">Upload Picture 1</div>
+      <div class="upload-box" tabindex="0">Upload Picture 2</div>
+      <div class="upload-box" tabindex="0">Upload Picture 3</div>
+      <div class="upload-box" tabindex="0">Upload Picture 4</div>
+      <div class="upload-box" tabindex="0">Upload Picture 5</div>
 
-        <label>Upload Pictures (Min 5)</label>
-
-        <div class="upload-box">Upload Picture 1</div>
-        <div class="upload-box">Upload Picture 2</div>
-        <div class="upload-box">Upload Picture 3</div>
-        <div class="upload-box">Upload Picture 4</div>
-        <div class="upload-box">Upload Picture 5</div>
-
-        <button>Send</button>
-
+      <button type="button">Send</button>
     </div>
-
-</div>
+  </div>
 </body>
 </html>
