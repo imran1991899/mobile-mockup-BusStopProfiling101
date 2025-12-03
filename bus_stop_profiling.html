@@ -316,7 +316,6 @@ const routeBusStops = {
     "SL182 PANGSAPURI KENANGA": "A-B",
     "SL183 PANGSAPURI CEMPAKA": "A-B",
     // Add other stops for Route 171 here
-  }
 };
 
 document.getElementById("depot").addEventListener("change", function() {
@@ -328,7 +327,7 @@ document.getElementById("depot").addEventListener("change", function() {
 
   // Populate routes based on selected depot
   if (depot === "Batu Caves") {
-    const routes = ["151", "170", "171"];
+    const routes = ["151", "170"];
     routes.forEach(route => {
       const option = document.createElement("option");
       option.value = route;
@@ -382,8 +381,16 @@ document.getElementById("busStop").addEventListener("change", function() {
   }
 });
 
+// Autofill subcategory and category based on issue selection
+document.getElementById("issue").addEventListener("change", function() {
+  const issue = this.value;
+  if (issue === "Construction in progress nearby the bus stop") {
+    document.getElementById("subcat1").value = "A2 - Pax";  // Autofill Subcategory
+    document.getElementById("subcat2").value = "A - Safety";  // Autofill Category
+  }
+});
+
 </script>
 
 </body>
 </html>
-
