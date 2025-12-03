@@ -139,7 +139,15 @@
         <option>(M) AJ108 AMPANG POINT (OPP)</option>
       </select>
 
-      <label>4️⃣ Bus Stop Condition</label>
+      <!-- 4️⃣ Direction -->
+      <label>4️⃣ Direction</label>
+      <select id="direction" required>
+        <option value="">--Select Direction--</option>
+        <option>A-B</option>
+        <option>B-A</option>
+      </select>
+
+      <label>5️⃣ Bus Stop Condition</label>
       <select id="condition" required>
         <option value="">--Select Condition--</option>
         <option>Covered Bus Stop</option>
@@ -148,8 +156,8 @@
         <option>Non-Infrastructure</option>
       </select>
 
-      <!-- 5️⃣ Issue -->
-      <label>5️⃣ Issue</label>
+      <!-- 6️⃣ Issue -->
+      <label>6️⃣ Issue</label>
       <select id="issue" required>
         <option value="">--Select Issue--</option>
         <option>Construction in progress nearby the bus stop</option>
@@ -163,8 +171,8 @@
         <option>Parking issue</option>
       </select>
 
-      <!-- 6️⃣ Subcategory -->
-      <label>6️⃣ Subcategory</label>
+      <!-- 7️⃣ Subcategory -->
+      <label>7️⃣ Subcategory</label>
       <select id="subcat1" required>
         <option value="">--Select Subcategory--</option>
         <option>A2 - Pax</option>
@@ -177,8 +185,8 @@
         <option>D1 - Enforcement</option>
       </select>
 
-      <!-- 7️⃣ Category -->
-      <label>7️⃣ Category</label>
+      <!-- 8️⃣ Category -->
+      <label>8️⃣ Category</label>
       <select id="subcat2" required>
         <option value="">--Select Category--</option>
         <option>A - Safety</option>
@@ -344,6 +352,7 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
   const busStop = document.getElementById("busStop").value.trim();
   const condition = document.getElementById("condition").value;
   const issue = document.getElementById("issue").value.trim();
+  const direction = document.getElementById("direction").value;
   const subcat1 = document.getElementById("subcat1").value.trim();
   const subcat2 = document.getElementById("subcat2").value.trim();
 
@@ -351,7 +360,7 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
     alert("⚠️ Staff ID must be exactly 8 digits.");
     return;
   }
-  if(!depot || !route || !busStop || !condition || !issue || !subcat1 || !subcat2){
+  if(!depot || !route || !busStop || !condition || !issue || !subcat1 || !subcat2 || !direction){
     alert("⚠️ Please fill all fields.");
     return;
   }
@@ -368,6 +377,7 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
   document.getElementById("busStop").value = "";
   document.getElementById("condition").value = "";
   document.getElementById("issue").value = "";
+  document.getElementById("direction").value = "";
   document.getElementById("subcat1").value = "";
   document.getElementById("subcat2").value = "";
 
@@ -383,4 +393,3 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
 
 </body>
 </html>
-
