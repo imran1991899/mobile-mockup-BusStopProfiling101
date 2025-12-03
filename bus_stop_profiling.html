@@ -53,7 +53,6 @@
     font-size: 15px;
   }
 
-  /* DOTTED UPLOAD BOX */
   .photo-slot {
     width: 100%;
     border: 2px dashed #2ecc71;
@@ -65,32 +64,6 @@
   }
 
   .photo-slot:hover { background: #edffed; }
-
-  .upload-title {
-    text-align: center;
-    color: #1a8c3a;
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-
-  .controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .controls button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-    font-size: 14px;
-  }
-
-  .btn-camera { background: #e67e22; }
-  .btn-upload { background: #2980b9; }
-  .hidden { display: none; }
 
   button.submit-btn {
     margin-top: 25px;
@@ -139,7 +112,6 @@
         <option value="">--Select Bus Stop--</option>
       </select>
 
-      <!-- 4️⃣ Direction (Auto-filled after bus stop selection) -->
       <label>4️⃣ Direction</label>
       <input type="text" id="direction" disabled>
 
@@ -152,7 +124,6 @@
         <option>Non-Infrastructure</option>
       </select>
 
-      <!-- 6️⃣ Issue -->
       <label>6️⃣ Issue</label>
       <select id="issue" required>
         <option value="">--Select Issue--</option>
@@ -167,7 +138,6 @@
         <option>Parking issue</option>
       </select>
 
-      <!-- 7️⃣ Subcategory -->
       <label>7️⃣ Subcategory</label>
       <select id="subcat1" required>
         <option value="">--Select Subcategory--</option>
@@ -181,7 +151,6 @@
         <option>D1 - Enforcement</option>
       </select>
 
-      <!-- 8️⃣ Category -->
       <label>8️⃣ Category</label>
       <select id="subcat2" required>
         <option value="">--Select Category--</option>
@@ -191,7 +160,7 @@
         <option>D - Enforcement</option>
       </select>
 
-      <label>📸 Upload Pictures (Camera / File)</label>
+      <label>📸 Upload Pictures</label>
       <div id="photoContainer"></div>
 
       <button type="submit" class="submit-btn">Send</button>
@@ -201,7 +170,7 @@
 </div>
 
 <script>
-// Map of Route and Bus Stops to Directions
+// ROUTE → BUS STOP → DIRECTION
 const routeBusStops = {
   "151": {
     "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
@@ -316,78 +285,103 @@ const routeBusStops = {
     "SL182 PANGSAPURI KENANGA": "A-B",
     "SL183 PANGSAPURI CEMPAKA": "A-B",
     // Add other stops for Route 171 here
+  }
 };
 
-document.getElementById("depot").addEventListener("change", function() {
+document.getElementById("depot").addEventListener("change", function () {
   const depot = this.value;
   const routeSelect = document.getElementById("route");
-
-  // Clear the current options
   routeSelect.innerHTML = '<option value="">--Select Route--</option>';
 
-  // Populate routes based on selected depot
-  if (depot === "Batu Caves") {
-    const routes = ["151", "170"];
-    routes.forEach(route => {
-      const option = document.createElement("option");
-      option.value = route;
-      option.textContent = route;
-      routeSelect.appendChild(option);
-    });
-  } else if (depot === "Cheras Selatan") {
-    const routes = ["540"];
-    routes.forEach(route => {
-      const option = document.createElement("option");
-      option.value = route;
-      option.textContent = route;
-      routeSelect.appendChild(option);
-    });
-  } else if (depot === "Maluri") {
-    const routes = ["221"];
-    routes.forEach(route => {
-      const option = document.createElement("option");
-      option.value = route;
-      option.textContent = route;
-      routeSelect.appendChild(option);
+  const depotRoutes = {
+    "Batu Caves": ["151", "170", "171"],
+    "Cheras Selatan": ["540"],
+    "Maluri": ["221"]
+  };
+
+  if (depotRoutes[depot]) {
+    depotRoutes[depot].forEach(r => {
+      let opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = r;
+      routeSelect.appendChild(opt);
     });
   }
 });
 
-document.getElementById("route").addEventListener("change", function() {
+document.getElementById("route").addEventListener("change", function () {
   const route = this.value;
   const busStopSelect = document.getElementById("busStop");
-
-  // Clear the current options
   busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
 
   if (routeBusStops[route]) {
-    for (let stop in routeBusStops[route]) {
-      const option = document.createElement("option");
-      option.value = stop;
-      option.textContent = stop;
-      busStopSelect.appendChild(option);
-    }
+    Object.keys(routeBusStops[route]).forEach(stop => {
+      let opt = document.createElement("option");
+      opt.value = stop;
+      opt.textContent = stop;
+      busStopSelect.appendChild(opt);
+    });
   }
 });
 
-document.getElementById("busStop").addEventListener("change", function() {
+document.getElementById("busStop").addEventListener("change", function () {
   const route = document.getElementById("route").value;
   const busStop = this.value;
-  const directionInput = document.getElementById("direction");
-
-  // Auto-fill direction based on selected route and bus stop
   if (routeBusStops[route] && routeBusStops[route][busStop]) {
-    directionInput.value = routeBusStops[route][busStop]; // Auto-fill direction field
+    document.getElementById("direction").value = routeBusStops[route][busStop];
   }
 });
 
-// Autofill subcategory and category based on issue selection
-document.getElementById("issue").addEventListener("change", function() {
-  const issue = this.value;
-  if (issue === "Construction in progress nearby the bus stop") {
-    document.getElementById("subcat1").value = "A2 - Pax";  // Autofill Subcategory
-    document.getElementById("subcat2").value = "A - Safety";  // Autofill Category
-  }
+// ✅ FULL AUTOFILL BASED ON TABLE IMAGE
+document.getElementById("issue").addEventListener("change", function () {
+    const issue = this.value;
+
+    const mapping = {
+        "Construction in progress nearby the bus stop": {
+            subcat: "A2 - Pax",
+            cat: "A - Safety"
+        },
+        "Missing infrastructure": {
+            subcat: "B1 - Missing Pole",
+            cat: "B - Insufficient Infra"
+        },
+        "Covered by trees": {
+            subcat: "C1 - Routine",
+            cat: "C - Maintenance"
+        },
+        "Malfunction lights": {
+            subcat: "C2 - Infra",
+            cat: "C - Maintenance"
+        },
+        "Outdated info panel": {
+            subcat: "C2 - Infra",
+            cat: "C - Maintenance"
+        },
+        "No bus marking - shelter": {
+            subcat: "C3 - Bus Bay (Shelter)",
+            cat: "C - Maintenance"
+        },
+        "No bus marking - pole": {
+            subcat: "C4 - Bus Bay (Pole)",
+            cat: "C - Maintenance"
+        },
+        "No street lighting": {
+            subcat: "C5 - Street Lighting",
+            cat: "C - Maintenance"
+        },
+        "Parking issue": {
+            subcat: "D1 - Enforcement",
+            cat: "D - Enforcement"
+        }
+    };
+
+    if (mapping[issue]) {
+        document.getElementById("subcat1").value = mapping[issue].subcat;
+        document.getElementById("subcat2").value = mapping[issue].cat;
+    } else {
+        document.getElementById("subcat1").value = "";
+        document.getElementById("subcat2").value = "";
+    }
 });
 
 </script>
