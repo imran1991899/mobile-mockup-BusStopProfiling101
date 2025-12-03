@@ -13,11 +13,21 @@
             background: white; border-radius: 25px;
             overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.15);
         }
+        /* HEADER */
         .header {
             background: #0b2a78;
             color: white; padding: 25px 20px;
             font-size: 20px; font-weight: bold;
+            display: flex; align-items: center; gap: 12px;
         }
+        .header-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%; /* round icon */
+            object-fit: cover;
+        }
+
+        /* GRID & CARDS */
         .grid {
             display: flex; flex-wrap: wrap; gap: 15px;
             padding: 20px; justify-content: center;
@@ -53,10 +63,13 @@
 <body>
 <div class="mobile">
 
+    <!-- HEADER -->
     <div class="header">
-        Hi, FARNO HAZLINA BINTI MUHAMMAD APANDI
+        <img src="iconP.png" class="header-icon">
+        <span>Hi, FARNO HAZLINA BINTI MUHAMMAD APANDI</span>
     </div>
 
+    <!-- GRID -->
     <div class="grid">
 
         <div class="card">
@@ -104,7 +117,7 @@
             Engineering Performance
         </div>
 
-        <!-- ONLY BUS STOP PROFILING HAS ICON -->
+        <!-- NEW MODULE: Bus Stop Profiling (ONLY CARD WITH ICON) -->
         <a href="bus_stop_profiling.html">
             <div class="card new-feature">
                 <div class="icon">
