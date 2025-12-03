@@ -29,15 +29,22 @@
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             font-size: 13px;
+            text-align: center;
         }
         .icon {
             width: 35px; height: 35px;
             background: #dce8ff; border-radius: 10px;
             margin-bottom: 5px;
             display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+        .icon img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
         }
         .new-feature {
-            border: 2px solid #0b66ff; /* Highlight new features with a blue border */
+            border: 2px solid #0b66ff;
         }
         a { text-decoration: none; color: black; }
     </style>
@@ -53,83 +60,110 @@
     <div class="grid">
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="parking.png">
+            </div>
             Parking Mgmt
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="bus-location.png">
+            </div>
             Bus Location
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="productivity.png">
+            </div>
             Mtn Productivity
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="attendance.png">
+            </div>
             Time Attendance
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="waybill.png">
+            </div>
             Digital Waybill
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="punctuality.png">
+            </div>
             Trip Punctuality
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="hazard.png">
+            </div>
             Spot The Hazard
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="accident.png">
+            </div>
             Accident Report
         </div>
 
         <div class="card">
-            <div class="icon"></div>
-               Engineering Performance
+            <div class="icon">
+                <img src="engineering.png">
+            </div>
+            Engineering Performance
         </div>
 
-        <!-- NEW MODULE: BUS STOP PROFILING -->
+        <!-- NEW MODULE -->
         <a href="bus_stop_profiling.html">
             <div class="card new-feature">
                 <div class="icon">
-                    <!-- Use a placeholder icon or custom icon -->
-                    <img src="bus-icon.png" alt="Bus Stop" style="width: 20px; height: 20px; object-fit: contain;">
+                    <img src="bus-icon.png">
                 </div>
                 <b>Bus Stop<br>Profiling</b>
             </div>
         </a>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="ptk.png">
+            </div>
             PTK
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="desire.png">
+            </div>
             DESIRE
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="rod.png">
+            </div>
             ROD
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="kaizen.png">
+            </div>
             Kaizen
         </div>
 
         <div class="card">
-            <div class="icon"></div>
+            <div class="icon">
+                <img src="5s.png">
+            </div>
             5S
         </div>
 
@@ -138,5 +172,3 @@
 </div>
 </body>
 </html>
-
-
