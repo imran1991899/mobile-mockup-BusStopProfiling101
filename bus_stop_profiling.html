@@ -196,129 +196,58 @@
 </div>
 
 <script>
-/* ----------------------------------
-   BUILD 3 PHOTO SLOTS
----------------------------------- */
-const maxPhotos = 3;
-const photoContainer = document.getElementById("photoContainer");
-let photos = [null, null, null];
+// Auto-select subcategory and category based on selected issue
+document.getElementById("issue").addEventListener("change", function() {
+  const issue = this.value;
 
-for (let i = 0; i < maxPhotos; i++) {
-
-  const slot = document.createElement("div");
-  slot.className = "photo-slot";
-
-  slot.innerHTML = `
-    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
-
-    <div class="controls">
-      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
-      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
-    </div>
-
-    <input type="file" id="file${i}" accept="image/*" class="hidden">
-    <video id="video${i}" class="hidden" autoplay playsinline></video>
-    <canvas id="canvas${i}" class="hidden"></canvas>
-  `;
-
-  photoContainer.appendChild(slot);
-
-  const fileInput = document.getElementById(`file${i}`);
-  const uploadBtn = document.getElementById(`upload${i}`);
-  const camBtn = document.getElementById(`cam${i}`);
-  const video = document.getElementById(`video${i}`);
-  const canvas = document.getElementById(`canvas${i}`);
-  const title = document.getElementById(`title${i}`);
-
-  /* FILE UPLOAD */
-  uploadBtn.onclick = () => fileInput.click();
-
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    if (file) {
-      photos[i] = file;
-      title.textContent = "📷 Picture Selected";
-      title.style.color = "#0b2a78";
+  // Define mapping for Issues -> Subcategories -> Categories
+  const issueMapping = {
+    "Construction in progress nearby the bus stop": {
+      subcategory: "A2 - Pax",
+      category: "A - Safety"
+    },
+    "Missing infrastructure": {
+      subcategory: "B1 - Missing Pole",
+      category: "B - Insufficient Infra"
+    },
+    "Covered by trees": {
+      subcategory: "C1 - Routine",
+      category: "C - Maintenance"
+    },
+    "Malfunction lights": {
+      subcategory: "C2 - Infra",
+      category: "C - Maintenance"
+    },
+    "Outdated info panel": {
+      subcategory: "C2 - Infra",
+      category: "C - Maintenance"
+    },
+    "No bus marking - shelter": {
+      subcategory: "C3 - Bus Bay (Shelter)",
+      category: "C - Maintenance"
+    },
+    "No bus marking - Pole": {
+      subcategory: "C4 - Bus Bay (Pole)",
+      category: "C - Maintenance"
+    },
+    "No street lighting": {
+      subcategory: "C5 - Street Lighting",
+      category: "C - Maintenance"
+    },
+    "Parking issue": {
+      subcategory: "D1 - Enforcement",
+      category: "D - Enforcement"
     }
   };
 
-  /* CAMERA CAPTURE */
-  camBtn.onclick = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-      video.classList.remove("hidden");
-      video.srcObject = stream;
-
-      camBtn.textContent = "📸 Capture Now";
-
-      camBtn.onclick = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-
-        canvas.toBlob((blob) => {
-          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
-          title.textContent = "📷 Photo Captured";
-          title.style.color = "#0b2a78";
-        });
-
-        video.srcObject.getTracks().forEach(t => t.stop());
-        video.classList.add("hidden");
-        camBtn.textContent = "📷 Take Photo";
-      };
-
-    } catch (err) {
-      alert("Camera blocked or not available.");
-    }
-  };
-}
-
-/* ----------------------------------
-   FORM SUBMIT + PARTIAL RESET
----------------------------------- */
-document.getElementById("profilingForm").addEventListener("submit", function(e){
-  e.preventDefault();
-
-  const staffId = document.getElementById("staffId").value.trim();
-  const depot = document.getElementById("depot").value.trim();
-  const route = document.getElementById("route").value.trim();
-  const busStop = document.getElementById("busStop").value.trim();
-  const condition = document.getElementById("condition").value;
-  const issue = document.getElementById("issue").value.trim();
-  const subcat1 = document.getElementById("subcat1").value.trim();
-  const subcat2 = document.getElementById("subcat2").value.trim();
-
-  if(!/^\d{8}$/.test(staffId)){
-    alert("⚠️ Staff ID must be exactly 8 digits.");
-    return;
-  }
-  if(!depot || !route || !busStop || !condition || !issue || !subcat1 || !subcat2){
-    alert("⚠️ Please fill all fields.");
-    return;
-  }
-
-  const uploaded = photos.filter(p => p !== null);
-  if(uploaded.length < 1){
-    alert("⚠️ Upload at least 1 picture.");
-    return;
-  }
-
-  alert("✅ Submitted successfully!");
-
-  // Reset BUT KEEP staffId, depot, route
-  document.getElementById("busStop").value = "";
-  document.getElementById("condition").value = "";
-  document.getElementById("issue").value = "";
-  document.getElementById("subcat1").value = "";
-  document.getElementById("subcat2").value = "";
-
-  photos = [null, null, null];
-
-  for (let i = 0; i < maxPhotos; i++) {
-    document.getElementById(`title${i}`).textContent = `Upload Picture ${i+1}`;
-    document.getElementById(`title${i}`).style.color = "#1a8c3a";
-    document.getElementById(`file${i}`).value = "";
+  // If the selected issue has a mapping, update the subcategory and category
+  if (issueMapping[issue]) {
+    document.getElementById("subcat1").value = issueMapping[issue].subcategory;
+    document.getElementById("subcat2").value = issueMapping[issue].category;
+  } else {
+    // If no match, clear the fields
+    document.getElementById("subcat1").value = "";
+    document.getElementById("subcat2").value = "";
   }
 });
 </script>
