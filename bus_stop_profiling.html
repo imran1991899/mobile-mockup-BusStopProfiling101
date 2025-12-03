@@ -53,6 +53,7 @@
     font-size: 15px;
   }
 
+  /* Upload boxes */
   .photo-slot {
     width: 100%;
     border: 2px dashed #2ecc71;
@@ -65,6 +66,32 @@
 
   .photo-slot:hover { background: #edffed; }
 
+  .upload-title {
+    text-align: center;
+    color: #1a8c3a;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .controls button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+  }
+
+  .btn-camera { background: #e67e22; }
+  .btn-upload { background: #2980b9; }
+  .hidden { display: none; }
+
   button.submit-btn {
     margin-top: 25px;
     width: 100%;
@@ -76,7 +103,6 @@
     font-size: 18px;
     cursor: pointer;
   }
-
 </style>
 </head>
 
@@ -89,7 +115,7 @@
   <div class="content">
 
     <form id="profilingForm">
-      
+
       <label>👤 Staff ID (8 digits)</label>
       <input type="text" id="staffId" maxlength="8" value="10011070" required>
       <small style="display: block; margin-top: 5px; color: #555;">FARNO HAZLINA BINTI MUHAMMAD APANDI</small>
@@ -139,28 +165,12 @@
       </select>
 
       <label>7️⃣ Subcategory</label>
-      <select id="subcat1" required>
-        <option value="">--Select Subcategory--</option>
-        <option>A2 - Pax</option>
-        <option>B1 - Missing Pole</option>
-        <option>C1 - Routine</option>
-        <option>C2 - Infra</option>
-        <option>C3 - Bus Bay (Shelter)</option>
-        <option>C4 - Bus Bay (Pole)</option>
-        <option>C5 - Street Lighting</option>
-        <option>D1 - Enforcement</option>
-      </select>
+      <select id="subcat1" required></select>
 
       <label>8️⃣ Category</label>
-      <select id="subcat2" required>
-        <option value="">--Select Category--</option>
-        <option>A - Safety</option>
-        <option>B - Insufficient Infra</option>
-        <option>C - Maintenance</option>
-        <option>D - Enforcement</option>
-      </select>
+      <select id="subcat2" required></select>
 
-      <label>📸 Upload Pictures</label>
+      <label>📸 Upload Pictures (Camera / File)</label>
       <div id="photoContainer"></div>
 
       <button type="submit" class="submit-btn">Send</button>
@@ -170,7 +180,7 @@
 </div>
 
 <script>
-// ROUTE → BUS STOP → DIRECTION
+// ---------------- ROUTE, BUS STOP & DIRECTION LOGIC ----------------
 const routeBusStops = {
   "151": {
     "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
@@ -288,102 +298,142 @@ const routeBusStops = {
   }
 };
 
+const depotRoutes = {
+  "Batu Caves": ["151", "170", "171"],
+  "Cheras Selatan": ["540"],
+  "Maluri": ["221"]
+};
+
 document.getElementById("depot").addEventListener("change", function () {
-  const depot = this.value;
   const routeSelect = document.getElementById("route");
   routeSelect.innerHTML = '<option value="">--Select Route--</option>';
 
-  const depotRoutes = {
-    "Batu Caves": ["151", "170", "171"],
-    "Cheras Selatan": ["540"],
-    "Maluri": ["221"]
-  };
-
-  if (depotRoutes[depot]) {
-    depotRoutes[depot].forEach(r => {
-      let opt = document.createElement("option");
-      opt.value = r;
-      opt.textContent = r;
-      routeSelect.appendChild(opt);
+  if (depotRoutes[this.value]) {
+    depotRoutes[this.value].forEach(r => {
+      routeSelect.innerHTML += `<option>${r}</option>`;
     });
   }
 });
 
 document.getElementById("route").addEventListener("change", function () {
-  const route = this.value;
   const busStopSelect = document.getElementById("busStop");
   busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
 
-  if (routeBusStops[route]) {
-    Object.keys(routeBusStops[route]).forEach(stop => {
-      let opt = document.createElement("option");
-      opt.value = stop;
-      opt.textContent = stop;
-      busStopSelect.appendChild(opt);
+  if (routeBusStops[this.value]) {
+    Object.keys(routeBusStops[this.value]).forEach(stop => {
+      busStopSelect.innerHTML += `<option>${stop}</option>`;
     });
   }
 });
 
 document.getElementById("busStop").addEventListener("change", function () {
   const route = document.getElementById("route").value;
-  const busStop = this.value;
-  if (routeBusStops[route] && routeBusStops[route][busStop]) {
-    document.getElementById("direction").value = routeBusStops[route][busStop];
+  const stop = this.value;
+  if (routeBusStops[route] && routeBusStops[route][stop]) {
+    document.getElementById("direction").value = routeBusStops[route][stop];
   }
 });
 
-// ✅ FULL AUTOFILL BASED ON TABLE IMAGE
+// ---------------- AUTO-FILL ISSUE MAPPING ----------------
+const mapping = {
+  "Construction in progress nearby the bus stop": { sub: "A2 - Pax", cat: "A - Safety" },
+  "Missing infrastructure": { sub: "B1 - Missing Pole", cat: "B - Insufficient Infra" },
+  "Covered by trees": { sub: "C1 - Routine", cat: "C - Maintenance" },
+  "Malfunction lights": { sub: "C2 - Infra", cat: "C - Maintenance" },
+  "Outdated info panel": { sub: "C2 - Infra", cat: "C - Maintenance" },
+  "No bus marking - shelter": { sub: "C3 - Bus Bay (Shelter)", cat: "C - Maintenance" },
+  "No bus marking - pole": { sub: "C4 - Bus Bay (Pole)", cat: "C - Maintenance" },
+  "No street lighting": { sub: "C5 - Street Lighting", cat: "C - Maintenance" },
+  "Parking issue": { sub: "D1 - Enforcement", cat: "D - Enforcement" }
+};
+
 document.getElementById("issue").addEventListener("change", function () {
-    const issue = this.value;
-
-    const mapping = {
-        "Construction in progress nearby the bus stop": {
-            subcat: "A2 - Pax",
-            cat: "A - Safety"
-        },
-        "Missing infrastructure": {
-            subcat: "B1 - Missing Pole",
-            cat: "B - Insufficient Infra"
-        },
-        "Covered by trees": {
-            subcat: "C1 - Routine",
-            cat: "C - Maintenance"
-        },
-        "Malfunction lights": {
-            subcat: "C2 - Infra",
-            cat: "C - Maintenance"
-        },
-        "Outdated info panel": {
-            subcat: "C2 - Infra",
-            cat: "C - Maintenance"
-        },
-        "No bus marking - shelter": {
-            subcat: "C3 - Bus Bay (Shelter)",
-            cat: "C - Maintenance"
-        },
-        "No bus marking - pole": {
-            subcat: "C4 - Bus Bay (Pole)",
-            cat: "C - Maintenance"
-        },
-        "No street lighting": {
-            subcat: "C5 - Street Lighting",
-            cat: "C - Maintenance"
-        },
-        "Parking issue": {
-            subcat: "D1 - Enforcement",
-            cat: "D - Enforcement"
-        }
-    };
-
-    if (mapping[issue]) {
-        document.getElementById("subcat1").value = mapping[issue].subcat;
-        document.getElementById("subcat2").value = mapping[issue].cat;
-    } else {
-        document.getElementById("subcat1").value = "";
-        document.getElementById("subcat2").value = "";
-    }
+  const m = mapping[this.value];
+  document.getElementById("subcat1").innerHTML = `<option>${m.sub}</option>`;
+  document.getElementById("subcat2").innerHTML = `<option>${m.cat}</option>`;
 });
 
+// ---------------- PICTURE UPLOAD (3 SLOTS) ----------------
+const maxPhotos = 3;
+let photos = [null, null, null];
+const photoContainer = document.getElementById("photoContainer");
+
+for (let i = 0; i < maxPhotos; i++) {
+
+  const slot = document.createElement("div");
+  slot.className = "photo-slot";
+
+  slot.innerHTML = `
+    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
+
+    <div class="controls">
+      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
+      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
+    </div>
+
+    <input type="file" id="file${i}" accept="image/*" class="hidden">
+    <video id="video${i}" class="hidden" autoplay playsinline></video>
+    <canvas id="canvas${i}" class="hidden"></canvas>
+  `;
+
+  photoContainer.appendChild(slot);
+
+  const fileInput = document.getElementById(`file${i}`);
+  const uploadBtn = document.getElementById(`upload${i}`);
+  const camBtn = document.getElementById(`cam${i}`);
+  const video = document.getElementById(`video${i}`);
+  const canvas = document.getElementById(`canvas${i}`);
+  const title = document.getElementById(`title${i}`);
+
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    photos[i] = fileInput.files[0];
+    title.textContent = "📷 Picture Selected";
+    title.style.color = "#0b2a78";
+  };
+
+  camBtn.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.classList.remove("hidden");
+      video.srcObject = stream;
+
+      camBtn.textContent = "📸 Capture Now";
+
+      camBtn.onclick = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
+          title.textContent = "📷 Photo Captured";
+          title.style.color = "#0b2a78";
+        });
+
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.classList.add("hidden");
+        camBtn.textContent = "📷 Take Photo";
+      };
+
+    } catch (err) {
+      alert("Camera blocked or not available.");
+    }
+  };
+}
+
+// ---------------- FORM SUBMISSION ----------------
+document.getElementById("profilingForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  if (photos.filter(p => p !== null).length < 1) {
+    alert("⚠️ Please upload at least 1 picture.");
+    return;
+  }
+
+  alert("✅ Form submitted successfully!");
+});
 </script>
 
 </body>
