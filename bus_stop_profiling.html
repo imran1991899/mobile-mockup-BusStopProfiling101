@@ -203,38 +203,25 @@
 </div>
 
 <script>
-// Mapping Depot to Routes and Bus Stops
-const depotRoutesStops = {
-  "Batu Caves": {
-    "151": [
-      { stop: "SL283 DATARAN BANDAR BARU SELAYANG", direction: "A-B" },
-      { stop: "SL287 STADIUM MPS (BARAT)", direction: "A-B" },
-      { stop: "SL288 BULATAN BERINGIN SELAYANG", direction: "A-B" },
-      { stop: "SL289 TAMAN SELAYANG SEGAR", direction: "A-B" },
-      { stop: "SL290 TAMAN SELAYANG INDAH", direction: "A-B" },
-      // ... (more stops for Route 151)
-    ],
-    "170": [
-      { stop: "SL294 HAB WIRA DAMAI", direction: "A-B" },
-      { stop: "SL182 PANGSAPURI KENANGA", direction: "A-B" },
-      // ... (more stops for Route 170)
-    ],
-    // Add other routes for Batu Caves
+// Map of Route and Bus Stops to Directions
+const routeBusStops = {
+  "151": {
+    "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
+    "SL287 STADIUM MPS (BARAT)": "A-B",
+    "SL288 BULATAN BERINGIN SELAYANG": "A-B",
+    // Add other stops for Route 151 here
   },
-  "Cheras Selatan": {
-    "540": [
-      { stop: "SL294 HAB WIRA DAMAI", direction: "A-B" },
-      { stop: "SL182 PANGSAPURI KENANGA", direction: "A-B" },
-      // ... (more stops for Route 540)
-    ],
-    // Add more routes for Cheras Selatan
+  "170": {
+    "SL294 HAB WIRA DAMAI": "A-B",
+    "SL182 PANGSAPURI KENANGA": "A-B",
+    "SL183 PANGSAPURI CEMPAKA": "A-B",
+    // Add other stops for Route 170 here
   },
-  "Maluri": {
-    "221": [
-      { stop: "SL294 HAB WIRA DAMAI", direction: "A-B" },
-      // Add more stops for Maluri routes
-    ],
-    // Add more routes for Maluri
+  "171": {
+    "SL294 HAB WIRA DAMAI": "A-B",
+    "SL182 PANGSAPURI KENANGA": "A-B",
+    "SL183 PANGSAPURI CEMPAKA": "A-B",
+    // Add other stops for Route 171 here
   }
 };
 
@@ -247,53 +234,70 @@ document.getElementById("depot").addEventListener("change", function() {
   routeSelect.innerHTML = '<option value="">--Select Route--</option>';
 
   // Populate routes based on selected depot
-  if (depotRoutesStops[depot]) {
-    for (let route in depotRoutesStops[depot]) {
+  if (depot === "Batu Caves") {
+    // Add relevant routes for Batu Caves
+    const routes = ["151", "170", "171"];
+    routes.forEach(route => {
       const option = document.createElement("option");
       option.value = route;
       option.textContent = route;
       routeSelect.appendChild(option);
-    }
+    });
+  } else if (depot === "Cheras Selatan") {
+    // Add relevant routes for Cheras Selatan
+    const routes = ["540"];
+    routes.forEach(route => {
+      const option = document.createElement("option");
+      option.value = route;
+      option.textContent = route;
+      routeSelect.appendChild(option);
+    });
+  } else if (depot === "Maluri") {
+    // Add relevant routes for Maluri
+    const routes = ["221"];
+    routes.forEach(route => {
+      const option = document.createElement("option");
+      option.value = route;
+      option.textContent = route;
+      routeSelect.appendChild(option);
+    });
   }
 });
 
 // Event listener for Route selection to populate Bus Stops
 document.getElementById("route").addEventListener("change", function() {
-  const depot = document.getElementById("depot").value;
   const route = this.value;
   const busStopSelect = document.getElementById("busStop");
 
   // Clear the current options
   busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
 
-  if (depotRoutesStops[depot] && depotRoutesStops[depot][route]) {
-    depotRoutesStops[depot][route].forEach(stop => {
+  // Populate bus stops based on selected route
+  if (routeBusStops[route]) {
+    for (let stop in routeBusStops[route]) {
       const option = document.createElement("option");
-      option.value = stop.stop;
-      option.textContent = stop.stop;
+      option.value = stop;
+      option.textContent = stop;
       busStopSelect.appendChild(option);
-    });
+    }
   }
 });
 
-// Event listener for Bus Stop selection to fill Direction
+// Event listener for Bus Stop selection to auto-fill Direction
 document.getElementById("busStop").addEventListener("change", function() {
-  const depot = document.getElementById("depot").value;
   const route = document.getElementById("route").value;
   const busStop = this.value;
   const directionSelect = document.getElementById("direction");
 
-  // Clear the current direction
+  // Clear current direction
   directionSelect.innerHTML = '<option value="">--Select Direction--</option>';
 
-  if (depotRoutesStops[depot] && depotRoutesStops[depot][route]) {
-    const selectedStop = depotRoutesStops[depot][route].find(stop => stop.stop === busStop);
-    if (selectedStop) {
-      const option = document.createElement("option");
-      option.value = selectedStop.direction;
-      option.textContent = selectedStop.direction;
-      directionSelect.appendChild(option);
-    }
+  if (routeBusStops[route] && routeBusStops[route][busStop]) {
+    const direction = routeBusStops[route][busStop];
+    const option = document.createElement("option");
+    option.value = direction;
+    option.textContent = direction;
+    directionSelect.appendChild(option);
   }
 });
 
@@ -323,7 +327,7 @@ document.getElementById("profilingForm").addEventListener("submit", function(e){
   }
 
   alert("✅ Submitted successfully!");
-  
+
   // Reset but keep some values
   document.getElementById("busStop").value = "";
   document.getElementById("route").value = "";
