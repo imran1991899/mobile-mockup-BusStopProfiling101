@@ -141,9 +141,7 @@
 
       <!-- 4️⃣ Direction (Auto-filled after bus stop selection) -->
       <label>4️⃣ Direction</label>
-      <select id="direction" required>
-        <option value="">--Select Direction--</option>
-      </select>
+      <input type="text" id="direction" disabled>
 
       <label>5️⃣ Bus Stop Condition</label>
       <select id="condition" required>
@@ -321,7 +319,6 @@ const routeBusStops = {
   }
 };
 
-// Event listener for Depot selection to update Route dropdown
 document.getElementById("depot").addEventListener("change", function() {
   const depot = this.value;
   const routeSelect = document.getElementById("route");
@@ -331,7 +328,6 @@ document.getElementById("depot").addEventListener("change", function() {
 
   // Populate routes based on selected depot
   if (depot === "Batu Caves") {
-    // Add relevant routes for Batu Caves
     const routes = ["151", "170", "171"];
     routes.forEach(route => {
       const option = document.createElement("option");
@@ -340,7 +336,6 @@ document.getElementById("depot").addEventListener("change", function() {
       routeSelect.appendChild(option);
     });
   } else if (depot === "Cheras Selatan") {
-    // Add relevant routes for Cheras Selatan
     const routes = ["540"];
     routes.forEach(route => {
       const option = document.createElement("option");
@@ -349,7 +344,6 @@ document.getElementById("depot").addEventListener("change", function() {
       routeSelect.appendChild(option);
     });
   } else if (depot === "Maluri") {
-    // Add relevant routes for Maluri
     const routes = ["221"];
     routes.forEach(route => {
       const option = document.createElement("option");
@@ -360,7 +354,6 @@ document.getElementById("depot").addEventListener("change", function() {
   }
 });
 
-// Event listener for Route selection to populate Bus Stops
 document.getElementById("route").addEventListener("change", function() {
   const route = this.value;
   const busStopSelect = document.getElementById("busStop");
@@ -368,7 +361,6 @@ document.getElementById("route").addEventListener("change", function() {
   // Clear the current options
   busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
 
-  // Populate bus stops based on selected route
   if (routeBusStops[route]) {
     for (let stop in routeBusStops[route]) {
       const option = document.createElement("option");
@@ -379,64 +371,18 @@ document.getElementById("route").addEventListener("change", function() {
   }
 });
 
-// Event listener for Bus Stop selection to auto-fill Direction
 document.getElementById("busStop").addEventListener("change", function() {
   const route = document.getElementById("route").value;
   const busStop = this.value;
-  const directionSelect = document.getElementById("direction");
+  const directionInput = document.getElementById("direction");
 
-  // Clear current direction
-  directionSelect.innerHTML = '<option value="">--Select Direction--</option>';
-
+  // Auto-fill direction based on selected route and bus stop
   if (routeBusStops[route] && routeBusStops[route][busStop]) {
-    const direction = routeBusStops[route][busStop];
-    const option = document.createElement("option");
-    option.value = direction;
-    option.textContent = direction;
-    directionSelect.appendChild(option);
+    directionInput.value = routeBusStops[route][busStop]; // Auto-fill direction field
   }
 });
 
-/* ----------------------------------
-   FORM SUBMIT + PARTIAL RESET
----------------------------------- */
-document.getElementById("profilingForm").addEventListener("submit", function(e){
-  e.preventDefault();
-
-  const staffId = document.getElementById("staffId").value.trim();
-  const depot = document.getElementById("depot").value.trim();
-  const route = document.getElementById("route").value.trim();
-  const busStop = document.getElementById("busStop").value.trim();
-  const condition = document.getElementById("condition").value;
-  const issue = document.getElementById("issue").value.trim();
-  const direction = document.getElementById("direction").value;
-  const subcat1 = document.getElementById("subcat1").value.trim();
-  const subcat2 = document.getElementById("subcat2").value.trim();
-
-  if(!/^\d{8}$/.test(staffId)){
-    alert("⚠️ Staff ID must be exactly 8 digits.");
-    return;
-  }
-  if(!depot || !route || !busStop || !condition || !issue || !subcat1 || !subcat2 || !direction){
-    alert("⚠️ Please fill all fields.");
-    return;
-  }
-
-  alert("✅ Submitted successfully!");
-
-  // Reset but keep some values
-  document.getElementById("busStop").value = "";
-  document.getElementById("route").value = "";
-  document.getElementById("depot").value = "";
-  document.getElementById("condition").value = "";
-  document.getElementById("issue").value = "";
-  document.getElementById("direction").value = "";
-  document.getElementById("subcat1").value = "";
-  document.getElementById("subcat2").value = "";
-
-});
 </script>
 
 </body>
 </html>
-
