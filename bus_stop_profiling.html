@@ -53,7 +53,6 @@
     font-size: 15px;
   }
 
-  /* Upload boxes */
   .photo-slot {
     width: 100%;
     border: 2px dashed #2ecc71;
@@ -119,6 +118,10 @@
       <label>👤 Staff ID (8 digits)</label>
       <input type="text" id="staffId" maxlength="8" value="10011070" required>
       <small style="display: block; margin-top: 5px; color: #555;">FARNO HAZLINA BINTI MUHAMMAD APANDI</small>
+
+      <!-- ⭐ ADDED TIMESTAMP FIELD ⭐ -->
+      <label>🕒 Timestamp</label>
+      <input type="text" id="timestamp" required>
 
       <label>1️⃣ Select Depot</label>
       <select id="depot" required>
@@ -293,8 +296,7 @@ const routeBusStops = {
   "171": {
     "SL294 HAB WIRA DAMAI": "A-B",
     "SL182 PANGSAPURI KENANGA": "A-B",
-    "SL183 PANGSAPURI CEMPAKA": "A-B",
-    // Add other stops for Route 171 here
+    "SL183 PANGSAPURI CEMPAKA": "A-B"
   }
 };
 
@@ -422,6 +424,22 @@ for (let i = 0; i < maxPhotos; i++) {
     }
   };
 }
+
+// ---------------- AUTO-FILL TIMESTAMP ----------------
+function updateTimestamp() {
+  const now = new Date();
+  const formatted =
+    now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, '0') + "-" +
+    String(now.getDate()).padStart(2, '0') + " " +
+    String(now.getHours()).padStart(2, '0') + ":" +
+    String(now.getMinutes()).padStart(2, '0') + ":" +
+    String(now.getSeconds()).padStart(2, '0');
+
+  document.getElementById("timestamp").value = formatted;
+}
+
+window.onload = updateTimestamp;
 
 // ---------------- FORM SUBMISSION ----------------
 document.getElementById("profilingForm").addEventListener("submit", function (e) {
