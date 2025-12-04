@@ -428,15 +428,11 @@ for (let i = 0; i < maxPhotos; i++) {
 // ---------------- AUTO-FILL TIMESTAMP ----------------
 function updateTimestamp() {
   const now = new Date();
-  const formatted =
-    now.getFullYear() + "-" +
-    String(now.getMonth() + 1).padStart(2, '0') + "-" +
-    String(now.getDate()).padStart(2, '0') + " " +
-    String(now.getHours()).padStart(2, '0') + ":" +
-    String(now.getMinutes()).padStart(2, '0') + ":" +
-    String(now.getSeconds()).padStart(2, '0');
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16); // yyyy-MM-ddTHH:mm
 
-  document.getElementById("timestamp").value = formatted;
+  document.getElementById("timestamp").value = local;
 }
 
 window.onload = updateTimestamp;
@@ -456,4 +452,5 @@ document.getElementById("profilingForm").addEventListener("submit", function (e)
 
 </body>
 </html>
+
 
