@@ -44,13 +44,19 @@
     color: #111;
   }
 
-  input[type="text"], select, input[type="datetime-local"] {
+  input[type="text"], select, input[type="datetime-local"], textarea {
     width: 100%;
     padding: 12px;
     margin-top: 8px;
     border-radius: 10px;
     border: 1px solid #c9c9c9;
     font-size: 15px;
+  }
+
+  textarea {
+    resize: none;
+    min-height: 80px;
+    overflow-y: hidden;
   }
 
   .photo-slot {
@@ -115,13 +121,13 @@
 
     <form id="profilingForm">
 
-      <!-- ⭐ POPUP DATE/TIME PICKER ⭐ -->
-      <label>🕒 Timestamp</label>
-      <input type="datetime-local" id="timestamp" required>
-
       <label>👤 Staff ID (8 digits)</label>
       <input type="text" id="staffId" maxlength="8" value="10011070" required>
       <small style="display: block; margin-top: 5px; color: #555;">FARNO HAZLINA BINTI MUHAMMAD APANDI</small>
+
+      <!-- TIMESTAMP -->
+      <label>🕒 Timestamp</label>
+      <input type="datetime-local" id="timestamp" required>
 
       <label>1️⃣ Select Depot</label>
       <select id="depot" required>
@@ -173,6 +179,10 @@
       <label>8️⃣ Category</label>
       <select id="subcat2" required></select>
 
+      <!-- ⭐ NEW REMARK TEXTAREA ⭐ -->
+      <label>📝 Remark</label>
+      <textarea id="remarks" placeholder="Type any additional notes here..."></textarea>
+
       <label>📸 Upload Pictures (Camera / File)</label>
       <div id="photoContainer"></div>
 
@@ -183,6 +193,14 @@
 </div>
 
 <script>
+// ---------------- AUTO-EXPAND TEXTAREA ----------------
+const remarksBox = document.getElementById("remarks");
+remarksBox.addEventListener("input", function () {
+  this.style.height = "auto";
+  this.style.height = (this.scrollHeight) + "px";
+});
+
+
 // ---------------- DEPOT, ROUTE, BUS STOP, DIRECTION ----------------
 const routeBusStops = {
   "151": {
@@ -249,6 +267,7 @@ const routeBusStops = {
     "KL583 SMK (P) JLN IPOH": "B-A",
     "KL584 KOMPLEKS MUTIARA": "B-A"
   },
+  
   "170": {
     "SL294 HAB WIRA DAMAI": "A-B",
     "SL182 PANGSAPURI KENANGA": "A-B",
@@ -293,6 +312,7 @@ const routeBusStops = {
     "KL616 PASAR SENTUL": "B-A",
     "KL617 SK SENTUL 2": "B-A"
   },
+
   "171": {
     "SL294 HAB WIRA DAMAI": "A-B",
     "SL182 PANGSAPURI KENANGA": "A-B",
@@ -429,10 +449,9 @@ for (let i = 0; i < maxPhotos; i++) {
 function updateTimestamp() {
   const now = new Date();
 
-  // Convert to local format for datetime-local input
   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
     .toISOString()
-    .slice(0, 16); // YYYY-MM-DDTHH:mm
+    .slice(0, 16);
 
   document.getElementById("timestamp").value = local;
 }
@@ -454,4 +473,3 @@ document.getElementById("profilingForm").addEventListener("submit", function (e)
 
 </body>
 </html>
-
