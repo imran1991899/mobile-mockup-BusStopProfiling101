@@ -44,7 +44,7 @@
     color: #111;
   }
 
-  input[type="text"], select {
+  input[type="text"], select, input[type="datetime-local"] {
     width: 100%;
     padding: 12px;
     margin-top: 8px;
@@ -115,13 +115,13 @@
 
     <form id="profilingForm">
 
-      <!-- ⭐ ADDED TIMESTAMP FIELD ⭐ -->
-      <label>🕒 Timestamp</label>
-      <input type="text" id="timestamp" required>
-      
       <label>👤 Staff ID (8 digits)</label>
       <input type="text" id="staffId" maxlength="8" value="10011070" required>
       <small style="display: block; margin-top: 5px; color: #555;">FARNO HAZLINA BINTI MUHAMMAD APANDI</small>
+
+      <!-- ⭐ POPUP DATE/TIME PICKER ⭐ -->
+      <label>🕒 Timestamp</label>
+      <input type="datetime-local" id="timestamp" required>
 
       <label>1️⃣ Select Depot</label>
       <select id="depot" required>
@@ -183,7 +183,7 @@
 </div>
 
 <script>
-// ---------------- ROUTE, BUS STOP & DIRECTION LOGIC ----------------
+// ---------------- DEPOT, ROUTE, BUS STOP, DIRECTION ----------------
 const routeBusStops = {
   "151": {
     "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
@@ -336,7 +336,7 @@ document.getElementById("busStop").addEventListener("change", function () {
   }
 });
 
-// ---------------- AUTO-FILL ISSUE MAPPING ----------------
+// ---------------- ISSUE MAPPING ----------------
 const mapping = {
   "Construction in progress nearby the bus stop": { sub: "A2 - Pax", cat: "A - Safety" },
   "Missing infrastructure": { sub: "B1 - Missing Pole", cat: "B - Insufficient Infra" },
@@ -355,7 +355,7 @@ document.getElementById("issue").addEventListener("change", function () {
   document.getElementById("subcat2").innerHTML = `<option>${m.cat}</option>`;
 });
 
-// ---------------- PICTURE UPLOAD (3 SLOTS) ----------------
+// ---------------- PHOTO UPLOAD ----------------
 const maxPhotos = 3;
 let photos = [null, null, null];
 const photoContainer = document.getElementById("photoContainer");
@@ -428,9 +428,11 @@ for (let i = 0; i < maxPhotos; i++) {
 // ---------------- AUTO-FILL TIMESTAMP ----------------
 function updateTimestamp() {
   const now = new Date();
+
+  // Convert to local format for datetime-local input
   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
     .toISOString()
-    .slice(0, 16); // yyyy-MM-ddTHH:mm
+    .slice(0, 16); // YYYY-MM-DDTHH:mm
 
   document.getElementById("timestamp").value = local;
 }
@@ -452,5 +454,3 @@ document.getElementById("profilingForm").addEventListener("submit", function (e)
 
 </body>
 </html>
-
-
