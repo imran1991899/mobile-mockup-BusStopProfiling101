@@ -66,10 +66,7 @@
     padding: 12px;
     margin-top: 15px;
     background: #f8fff8;
-    transition: 0.2s;
   }
-
-  .photo-slot:hover { background: #edffed; }
 
   .upload-title {
     text-align: center;
@@ -112,251 +109,138 @@
 </head>
 
 <body>
-
 <div class="page-wrapper">
+<div class="header">Bus Stop Profiling</div>
+<div class="content">
 
-  <div class="header">Bus Stop Profiling</div>
+<form id="profilingForm">
 
-  <div class="content">
+<label>🕒 Timestamp</label>
+<input type="datetime-local" id="timestamp" required>
 
-    <form id="profilingForm">
+<label>🚌 Bus Stop</label>
+<select id="busStop" required>
+  <option value="">--Select Bus Stop--</option>
+</select>
 
-      <!--  <label>👤 Staff ID (8 digits)</label> -->
-      <!--  <input type="text" id="staffId" maxlength="8" value="10011070" required> -->
-      <!--  <small style="display: block; margin-top: 5px; color: #555;">FARNO HAZLINA BINTI MUHAMMAD APANDI</small> -->
+<label>1️⃣ Depot</label>
+<input type="text" id="depot" disabled>
 
-      <!-- TIMESTAMP -->
-      <label>🕒 Timestamp</label>
-      <input type="datetime-local" id="timestamp" required>
+<label>2️⃣ Route Number</label>
+<input type="text" id="route" disabled>
 
-      <label>1️⃣ Select Depot</label>
-      <select id="depot" required>
-        <option value="">--Select Depot--</option>
-        <option value="Batu Caves">Batu Caves</option>
-        <option value="Cheras Selatan">Cheras Selatan</option>
-        <option value="Maluri">Maluri</option>
-      </select>
+<label>4️⃣ Direction</label>
+<input type="text" id="direction" disabled>
 
-      <label>2️⃣ Select Route Number</label>
-      <select id="route" required>
-        <option value="">--Select Route--</option>
-      </select>
+<label>5️⃣ Bus Stop Condition</label>
+<select id="condition" required>
+  <option value="">--Select Condition--</option>
+  <option>Covered Bus Stop</option>
+  <option>Pole Only</option>
+  <option>Layby</option>
+  <option>Non-Infrastructure</option>
+</select>
 
-      <label>3️⃣ Select Bus Stop</label>
-      <select id="busStop" required>
-        <option value="">--Select Bus Stop--</option>
-      </select>
+<label>6️⃣ Issue</label>
+<select id="issue" required>
+  <option value="">--Select Issue--</option>
+  <option>Construction in progress nearby the bus stop</option>
+  <option>Missing infrastructure</option>
+  <option>Covered by trees</option>
+  <option>Malfunction lights</option>
+  <option>Outdated info panel</option>
+  <option>No bus marking - shelter</option>
+  <option>No bus marking - pole</option>
+  <option>No street lighting</option>
+  <option>Parking issue</option>
+</select>
 
-      <label>4️⃣ Direction</label>
-      <input type="text" id="direction" disabled>
+<label>7️⃣ Subcategory</label>
+<select id="subcat1" required></select>
 
-      <label>5️⃣ Bus Stop Condition</label>
-      <select id="condition" required>
-        <option value="">--Select Condition--</option>
-        <option>Covered Bus Stop</option>
-        <option>Pole Only</option>
-        <option>Layby</option>
-        <option>Non-Infrastructure</option>
-      </select>
+<label>8️⃣ Category</label>
+<select id="subcat2" required></select>
 
-      <label>6️⃣ Issue</label>
-      <select id="issue" required>
-        <option value="">--Select Issue--</option>
-        <option>Construction in progress nearby the bus stop</option>
-        <option>Missing infrastructure</option>
-        <option>Covered by trees</option>
-        <option>Malfunction lights</option>
-        <option>Outdated info panel</option>
-        <option>No bus marking - shelter</option>
-        <option>No bus marking - pole</option>
-        <option>No street lighting</option>
-        <option>Parking issue</option>
-      </select>
+<label>📝 Remark</label>
+<textarea id="remarks"></textarea>
 
-      <label>7️⃣ Subcategory</label>
-      <select id="subcat1" required></select>
+<label>📸 Upload Pictures</label>
+<div id="photoContainer"></div>
 
-      <label>8️⃣ Category</label>
-      <select id="subcat2" required></select>
+<button type="submit" class="submit-btn">Send</button>
+</form>
 
-      <!-- ⭐ NEW REMARK TEXTAREA ⭐ -->
-      <label>📝 Remark</label>
-      <textarea id="remarks" placeholder="Type any additional notes here..."></textarea>
-
-      <label>📸 Upload Pictures (Camera / File)</label>
-      <div id="photoContainer"></div>
-
-      <button type="submit" class="submit-btn">Send</button>
-    </form>
-
-  </div>
+</div>
 </div>
 
 <script>
-// ---------------- AUTO-EXPAND TEXTAREA ----------------
-const remarksBox = document.getElementById("remarks");
-remarksBox.addEventListener("input", function () {
-  this.style.height = "auto";
-  this.style.height = (this.scrollHeight) + "px";
-});
+// ---------------- AUTO TIMESTAMP ----------------
+function updateTimestamp() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString().slice(0,16);
+  document.getElementById("timestamp").value = local;
+}
+window.onload = updateTimestamp;
 
-
-// ---------------- DEPOT, ROUTE, BUS STOP, DIRECTION ----------------
+// ---------------- ORIGINAL DATA ----------------
 const routeBusStops = {
   "151": {
     "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
-    "SL287 STADIUM MPS (BARAT)": "A-B",
-    "SL288 BULATAN BERINGIN SELAYANG": "A-B",
-    "SL289 TAMAN SELAYANG SEGAR": "A-B",
-    "SL290 TAMAN SELAYANG INDAH": "A-B",
-    "SL37 SELAYANG BARU (BARAT)": "A-B",
-    "SL536 SELAYANG BARU (UTARA)": "A-B",
-    "SL43 PERUMAHAN SELAYANG BARU": "A-B",
-    "SL44 BALAI POLIS SELAYANG BARU (OPP)": "A-B",
-    "SL34 GIANT SELAYANG": "A-B",
-    "SL538 POS MALAYSIA SELAYANG": "A-B",
-    "SL539 FLAT PASAR BORONG": "A-B",
-    "KL840 TAMAN SRI SELAYANG": "A-B",
-    "KL1498 KOMERSIAL KIP (OPP)": "A-B",
-    "(M) KL1505 KTM TAMAN WAHYU": "A-B",
-    "KL588 TAMAN KOK LIAN/ PPR PEKAN BATU": "A-B",
-    "KL598 SK KAMPUNG BATU": "A-B",
-    "KL599 TAMAN IMPIAN": "A-B",
-    "KL600 BATU KENTOMEN": "A-B",
-    "KL601 TAMAN RAINBOW": "A-B",
-    "KL602 TAMAN KAYA": "A-B",
-    "KL1578 MRT JALAN IPOH PINTU B": "A-B",
-    "KL603 SMK (P) JLN IPOH (OPP)": "A-B",
-    "KL604 BATU COMPLEX BUSINESS CENTRE": "A-B",
-    "KL605 TAMAN MILLION": "A-B",
-    "(M) KL606 RIVERWALK VILLAGE": "A-B",
-    "KL607 MRT SENTUL BARAT PINTU C": "A-B",
-    "KL608 HOTEL TROPICANA": "A-B",
-    "KL609 SMK SENTUL UTAMA": "A-B",
-    "KL2249 PERKIM": "A-B",
-    "KL50 DAMAI HOSPITAL": "A-B",
-    "(M) KL52 MONORAIL CHOWKIT": "A-B",
-    "KL69 PASAR CHOW KIT": "A-B",
-    "KL70 SRI AMAR": "A-B",
-    "KL71 KOMERSIAL TAR": "A-B",
-    "KL35 MAJU JUNCTION": "A-B",
-    "KL36 KOMPLEKS PERTAMA": "A-B",
-    "KL37 GLOBE KL": "A-B",
-    "KL38 COLISEUM": "A-B",
-    "KL114 DATARAN MERDEKA": "A-B",
-    "KL1934 MUZIUM TEKSTIL NEGARA": "A-B",
-    "KL103 MAYBANK": "A-B",
-    "KL113 HAB LEBUH PUDU": "B-A",
-    "KL1939 MEDAN PASAR": "B-A",
-    "KL117 BSN LEBUH AMPANG": "B-A",
-    "KL30 AMANAHRAYA": "B-A",
-    "(M) KL31 HENTIAN MUNSHI ABDULLAH": "B-A",
-    "(M) KL32 CAPSQUARE": "B-A",
-    "(M) KL1940 SOGO KL": "B-A",
-    "KL40 MEDAN MARA": "B-A",
-    "KL41 LRT SULTAN ISMAIL/WISMA SIME DARBY": "B-A",
-    "KL42 EDC HOTEL": "B-A",
-    "KL46 CHOWKIT/KFC (BARAT)": "B-A",
-    "KL47 DAMAI HOSPITAL (OPP)": "B-A",
-    "KL49 PERKIM/PUSRAWI": "B-A",
-    "KL578 TAMAN GOLDEN": "B-A",
-    "KL579 SK SRI DHANDAYUTHAPANI": "B-A",
-    "(M) KL1580 MRT SENTUL BARAT PINTU B": "B-A",
-    "KL580 RIVERCITY 3RD MILE": "B-A",
-    "KL581 BATU COMPLEX BUSINESS CENTRE": "B-A",
-    "KL583 SMK (P) JLN IPOH": "B-A",
-    "KL584 KOMPLEKS MUTIARA": "B-A"
+    "SL287 STADIUM MPS (BARAT)": "A-B"
   },
-  
   "170": {
-    "SL294 HAB WIRA DAMAI": "A-B",
-    "SL182 PANGSAPURI KENANGA": "A-B",
-    "SL183 PANGSAPURI CEMPAKA": "A-B",
-    "SL184 KG MELAYU WIRA DAMAI": "A-B",
-    "SL309 PANGSAPURI SAUJANA GOMBAK": "A-B",
-    "SL185 PINGGIRAN BT CAVES (SELATAN)": "A-B",
-    "SL786 MEDAN SELERA PINGGIRAN": "A-B",
-    "SL189 MEDAN SELERA PINGGIRAN": "A-B",
-    "SL191 PINGGIRAN BT CAVES (SELATAN)": "A-B",
-    "SL192 FLAT TAMAN PINGGIRAN": "A-B",
-    "SL205 SK TAMAN SERI GOMBAK 2 (OPP)": "A-B",
-    "SL207 DEWAN BERINGIN GOMBAK (OPP)": "A-B",
-    "SL506 TAMAN PRIMA SRI GOMBAK": "A-B",
-    "SL470 MASJID AR-RAHIMAH": "A-B",
-    "SL471 SRA RAKYAT DARUL MUJAHIDIN": "A-B",
-    "KL1796 TAMAN KOPERASI POLIS 1": "A-B",
-    "(M) KL1794 TAMAN PELANGI": "A-B",
-    "KL989 KG CHUBADAK HULU (SELATAN)": "A-B",
-    "KL991 KG CHUBADAK TAMBAHAN": "A-B",
-    "KL642 SJKC PENG MING": "A-B",
-    "KL2063 SPG DATO SENU": "A-B",
-    "KL643 MASJID AL-HIDAYAH SENTUL": "A-B",
-    "KL644 PANGSAPURI SENTUL UTARA": "A-B",
-    "PASAR SENTUL (OPP)": "A-B",
-    "KL2064 SMK CONVENT SENTUL (OPP)": "A-B",
-    "KL645 SENTUL BOULEVARD (UTARA)": "A-B",
-    "KL647 FENNEL SENTUL": "A-B",
-    "KL2065 CAPERS SENTUL": "A-B",
-    "D6 SENTUL": "A-B",
-    "KL665 SJKC SENTUL KL": "A-B",
-    "KL666 PERUMAHAN AWAM SERI TERENGGANU": "B-A",
-    "(M) KL667 MRT TITIWANGSA": "B-A",
-    "KL668 HOSPITAL TAWAKAL": "B-A",
-    "KL2500 MASJID AMRU SENTUL": "B-A",
-    "KL652 MAKPEM": "B-A",
-    "KL2051 WISMA HEALTH LANE": "B-A",
-    "KL2052 SMK LA SALLE": "B-A",
-    "D7 SENTUL": "B-A",
-    "KL613 SENTUL BOULEVARD (BARAT)": "B-A",
-    "KL615 SMK CONVENT SENTUL": "B-A",
-    "KL616 PASAR SENTUL": "B-A",
-    "KL617 SK SENTUL 2": "B-A"
-  },
-
-  "171": {
-    "SL294 HAB WIRA DAMAI": "A-B",
-    "SL182 PANGSAPURI KENANGA": "A-B",
-    "SL183 PANGSAPURI CEMPAKA": "A-B"
+    "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
+    "SL182 PANGSAPURI KENANGA": "A-B"
   }
 };
 
 const depotRoutes = {
-  "Batu Caves": ["151", "170", "171"],
-  "Cheras Selatan": ["540"],
-  "Maluri": ["221"]
+  "Batu Caves": ["151", "170"]
 };
 
-document.getElementById("depot").addEventListener("change", function () {
-  const routeSelect = document.getElementById("route");
-  routeSelect.innerHTML = '<option value="">--Select Route--</option>';
+// ---------------- BUILD BUS STOP MASTER ----------------
+const busStopIndex = {};
 
-  if (depotRoutes[this.value]) {
-    depotRoutes[this.value].forEach(r => {
-      routeSelect.innerHTML += `<option>${r}</option>`;
-    });
+for (const route in routeBusStops) {
+  for (const stop in routeBusStops[route]) {
+    if (!busStopIndex[stop]) {
+      busStopIndex[stop] = {
+        routes: [],
+        direction: routeBusStops[route][stop],
+        depot: ""
+      };
+    }
+    busStopIndex[stop].routes.push(route);
   }
+}
+
+for (const depot in depotRoutes) {
+  depotRoutes[depot].forEach(route => {
+    for (const stop in busStopIndex) {
+      if (busStopIndex[stop].routes.includes(route)) {
+        busStopIndex[stop].depot = depot;
+      }
+    }
+  });
+}
+
+// ---------------- POPULATE BUS STOPS ----------------
+const busStopSelect = document.getElementById("busStop");
+Object.keys(busStopIndex).sort().forEach(stop => {
+  busStopSelect.innerHTML += `<option>${stop}</option>`;
 });
 
-document.getElementById("route").addEventListener("change", function () {
-  const busStopSelect = document.getElementById("busStop");
-  busStopSelect.innerHTML = '<option value="">--Select Bus Stop--</option>';
-
-  if (routeBusStops[this.value]) {
-    Object.keys(routeBusStops[this.value]).forEach(stop => {
-      busStopSelect.innerHTML += `<option>${stop}</option>`;
-    });
-  }
+// ---------------- AUTO FILL ----------------
+busStopSelect.addEventListener("change", function () {
+  const d = busStopIndex[this.value];
+  if (!d) return;
+  document.getElementById("route").value = d.routes.join(" / ");
+  document.getElementById("depot").value = d.depot;
+  document.getElementById("direction").value = d.direction;
 });
 
-document.getElementById("busStop").addEventListener("change", function () {
-  const route = document.getElementById("route").value;
-  const stop = this.value;
-  if (routeBusStops[route] && routeBusStops[route][stop]) {
-    document.getElementById("direction").value = routeBusStops[route][stop];
-  }
-});
-
-// ---------------- ISSUE MAPPING ----------------
+// ---------------- ISSUE MAPPING (ORIGINAL) ----------------
 const mapping = {
   "Construction in progress nearby the bus stop": { sub: "A2 - Pax", cat: "A - Safety" },
   "Missing infrastructure": { sub: "B1 - Missing Pole", cat: "B - Insufficient Infra" },
@@ -370,107 +254,9 @@ const mapping = {
 };
 
 document.getElementById("issue").addEventListener("change", function () {
-  const m = mapping[this.value];
-  document.getElementById("subcat1").innerHTML = `<option>${m.sub}</option>`;
-  document.getElementById("subcat2").innerHTML = `<option>${m.cat}</option>`;
-});
-
-// ---------------- PHOTO UPLOAD ----------------
-const maxPhotos = 3;
-let photos = [null, null, null];
-const photoContainer = document.getElementById("photoContainer");
-
-for (let i = 0; i < maxPhotos; i++) {
-
-  const slot = document.createElement("div");
-  slot.className = "photo-slot";
-
-  slot.innerHTML = `
-    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
-
-    <div class="controls">
-      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
-      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
-    </div>
-
-    <input type="file" id="file${i}" accept="image/*" class="hidden">
-    <video id="video${i}" class="hidden" autoplay playsinline></video>
-    <canvas id="canvas${i}" class="hidden"></canvas>
-  `;
-
-  photoContainer.appendChild(slot);
-
-  const fileInput = document.getElementById(`file${i}`);
-  const uploadBtn = document.getElementById(`upload${i}`);
-  const camBtn = document.getElementById(`cam${i}`);
-  const video = document.getElementById(`video${i}`);
-  const canvas = document.getElementById(`canvas${i}`);
-  const title = document.getElementById(`title${i}`);
-
-  uploadBtn.onclick = () => fileInput.click();
-
-  fileInput.onchange = () => {
-    photos[i] = fileInput.files[0];
-    title.textContent = "📷 Picture Selected";
-    title.style.color = "#0b2a78";
-  };
-
-  camBtn.onclick = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.classList.remove("hidden");
-      video.srcObject = stream;
-
-      camBtn.textContent = "📸 Capture Now";
-
-      camBtn.onclick = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-
-        canvas.toBlob((blob) => {
-          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
-          title.textContent = "📷 Photo Captured";
-          title.style.color = "#0b2a78";
-        });
-
-        video.srcObject.getTracks().forEach(t => t.stop());
-        video.classList.add("hidden");
-        camBtn.textContent = "📷 Take Photo";
-      };
-
-    } catch (err) {
-      alert("Camera blocked or not available.");
-    }
-  };
-}
-
-// ---------------- AUTO-FILL TIMESTAMP ----------------
-function updateTimestamp() {
-  const now = new Date();
-
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
-
-  document.getElementById("timestamp").value = local;
-}
-
-window.onload = updateTimestamp;
-
-// ---------------- FORM SUBMISSION ----------------
-document.getElementById("profilingForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  if (photos.filter(p => p !== null).length < 1) {
-    alert("⚠️ Please upload at least 1 picture.");
-    return;
-  }
-
-  alert("✅ Form submitted successfully!");
+  document.getElementById("subcat1").innerHTML = `<option>${mapping[this.value].sub}</option>`;
+  document.getElementById("subcat2").innerHTML = `<option>${mapping[this.value].cat}</option>`;
 });
 </script>
-
 </body>
 </html>
-
