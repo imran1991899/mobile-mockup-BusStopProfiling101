@@ -231,6 +231,27 @@ Object.keys(busStopIndex).sort().forEach(stop => {
   busStopSelect.innerHTML += `<option>${stop}</option>`;
 });
 
+// ---------------- TYPE-TO-SEARCH INSIDE BUS STOP SELECT ----------------
+let typeBuffer = "";
+let bufferTimeout = null;
+
+busStopSelect.addEventListener("keydown", function (e) {
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+    typeBuffer += e.key.toLowerCase();
+
+    clearTimeout(bufferTimeout);
+    bufferTimeout = setTimeout(() => typeBuffer = "", 700);
+
+    for (let i = 0; i < this.options.length; i++) {
+      if (this.options[i].text.toLowerCase().startsWith(typeBuffer)) {
+        this.selectedIndex = i;
+        this.dispatchEvent(new Event("change")); // auto-fill route/depot
+        break;
+      }
+    }
+  }
+});
+  
 // ---------------- AUTO FILL ----------------
 busStopSelect.addEventListener("change", function () {
   const d = busStopIndex[this.value];
@@ -357,6 +378,7 @@ document.getElementById("profilingForm").addEventListener("submit", function (e)
 
 </body>
 </html>
+
 
 
 
