@@ -118,6 +118,9 @@
 <label>🕒 Timestamp</label>
 <input type="datetime-local" id="timestamp" required>
 
+<label>🔍 Search Bus Stop</label>
+<input type="text" id="busStopSearch" placeholder="Type bus stop name or code...">
+
 <label>🚌 Bus Stop</label>
 <select id="busStop" required>
   <option value="">--Select Bus Stop--</option>
@@ -254,9 +257,108 @@ const mapping = {
 };
 
 document.getElementById("issue").addEventListener("change", function () {
-  document.getElementById("subcat1").innerHTML = `<option>${mapping[this.value].sub}</option>`;
-  document.getElementById("subcat2").innerHTML = `<option>${mapping[this.value].cat}</option>`;
+  const m = mapping[this.value];
+  document.getElementById("subcat1").innerHTML = `<option>${m.sub}</option>`;
+  document.getElementById("subcat2").innerHTML = `<option>${m.cat}</option>`;
+});
+
+// ---------------- PHOTO UPLOAD ----------------
+const maxPhotos = 3;
+let photos = [null, null, null];
+const photoContainer = document.getElementById("photoContainer");
+
+for (let i = 0; i < maxPhotos; i++) {
+
+  const slot = document.createElement("div");
+  slot.className = "photo-slot";
+
+  slot.innerHTML = `
+    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
+
+    <div class="controls">
+      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
+      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
+    </div>
+
+    <input type="file" id="file${i}" accept="image/*" class="hidden">
+    <video id="video${i}" class="hidden" autoplay playsinline></video>
+    <canvas id="canvas${i}" class="hidden"></canvas>
+  `;
+
+  photoContainer.appendChild(slot);
+
+  const fileInput = document.getElementById(`file${i}`);
+  const uploadBtn = document.getElementById(`upload${i}`);
+  const camBtn = document.getElementById(`cam${i}`);
+  const video = document.getElementById(`video${i}`);
+  const canvas = document.getElementById(`canvas${i}`);
+  const title = document.getElementById(`title${i}`);
+
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    photos[i] = fileInput.files[0];
+    title.textContent = "📷 Picture Selected";
+    title.style.color = "#0b2a78";
+  };
+
+  camBtn.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.classList.remove("hidden");
+      video.srcObject = stream;
+
+      camBtn.textContent = "📸 Capture Now";
+
+      camBtn.onclick = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
+          title.textContent = "📷 Photo Captured";
+          title.style.color = "#0b2a78";
+        });
+
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.classList.add("hidden");
+        camBtn.textContent = "📷 Take Photo";
+      };
+
+    } catch (err) {
+      alert("Camera blocked or not available.");
+    }
+  };
+}
+
+// ---------------- AUTO-FILL TIMESTAMP ----------------
+function updateTimestamp() {
+  const now = new Date();
+
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
+  document.getElementById("timestamp").value = local;
+}
+
+window.onload = updateTimestamp;
+
+// ---------------- FORM SUBMISSION ----------------
+document.getElementById("profilingForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  if (photos.filter(p => p !== null).length < 1) {
+    alert("⚠️ Please upload at least 1 picture.");
+    return;
+  }
+
+  alert("✅ Form submitted successfully!");
 });
 </script>
+
 </body>
 </html>
+
+
