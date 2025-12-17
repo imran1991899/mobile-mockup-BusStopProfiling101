@@ -13,7 +13,7 @@ const busStopIndex = {};
 const busStopSelect = document.getElementById("busStop");
 
 // 🔴 CHANGE THIS TO YOUR CSV RAW URL ON GITHUB
-const csvUrl = "https://github.com/imran1991899/mobile-mockup-BusStopProfiling101/edit/main/busstop_data.csv";
+const csvUrl = "https://github.com/imran1991899/mobile-mockup-BusStopProfiling101/blob/main/busstop_data.csv";
 
 fetch(csvUrl)
   .then(res => res.text())
@@ -180,4 +180,5 @@ document.getElementById("profilingForm").addEventListener("submit", function (e)
   alert("✅ Form submitted successfully!");
 });
 </script>
+
 
