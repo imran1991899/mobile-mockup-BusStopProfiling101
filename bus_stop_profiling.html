@@ -181,61 +181,52 @@ function updateTimestamp() {
     .toISOString().slice(0,16);
   document.getElementById("timestamp").value = local;
 }
-window.onload = updateTimestamp;
 
-// ---------------- ORIGINAL DATA ----------------
-const routeBusStops = {
-  "151": {
-    "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
-    "SL287 STADIUM MPS (BARAT)": "A-B"
-  },
-  "170": {
-    "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
-    "SL182 PANGSAPURI KENANGA": "A-B"
-  }
-};
+// ---------------- BUS STOP DATA ----------------
+let busStopIndex = {};
 
-const depotRoutes = {
-  "Batu Caves": ["151", "170"]
-};
+// Load CSV dynamically
+async function loadBusStopCSV() {
+  try {
+    const response = await fetch('busstop_data.csv');
+    const csvText = await response.text();
+    const lines = csvText.trim().split('\n');
+    const headers = lines.shift().split(',');
 
-// ---------------- BUILD BUS STOP MASTER ----------------
-const busStopIndex = {};
+    lines.forEach(line => {
+      const data = line.split(',');
+      const stop = data[0].trim();
+      const depot = data[1].trim();
+      const route = data[2].trim();
+      const direction = data[3].trim();
 
-for (const route in routeBusStops) {
-  for (const stop in routeBusStops[route]) {
-    if (!busStopIndex[stop]) {
-      busStopIndex[stop] = {
-        routes: [],
-        direction: routeBusStops[route][stop],
-        depot: ""
-      };
-    }
-    busStopIndex[stop].routes.push(route);
+      if (!busStopIndex[stop]) {
+        busStopIndex[stop] = { depot: depot, routes: [], direction: direction };
+      }
+      if (!busStopIndex[stop].routes.includes(route)) {
+        busStopIndex[stop].routes.push(route);
+      }
+    });
+
+    populateBusStops();
+  } catch (err) {
+    console.error("Error loading CSV:", err);
   }
 }
 
-for (const depot in depotRoutes) {
-  depotRoutes[depot].forEach(route => {
-    for (const stop in busStopIndex) {
-      if (busStopIndex[stop].routes.includes(route)) {
-        busStopIndex[stop].depot = depot;
-      }
-    }
+function populateBusStops() {
+  const busStopSelect = document.getElementById("busStop");
+  busStopSelect.innerHTML = `<option value="">--Select Bus Stop--</option>`;
+  Object.keys(busStopIndex).sort().forEach(stop => {
+    busStopSelect.innerHTML += `<option>${stop}</option>`;
   });
 }
-
-// ---------------- POPULATE BUS STOPS ----------------
-const busStopSelect = document.getElementById("busStop");
-Object.keys(busStopIndex).sort().forEach(stop => {
-  busStopSelect.innerHTML += `<option>${stop}</option>`;
-});
 
 // ---------------- TYPE-TO-SEARCH INSIDE BUS STOP SELECT ----------------
 let typeBuffer = "";
 let bufferTimeout = null;
 
-busStopSelect.addEventListener("keydown", function (e) {
+document.getElementById("busStop").addEventListener("keydown", function (e) {
   if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
     typeBuffer += e.key.toLowerCase();
 
@@ -251,9 +242,9 @@ busStopSelect.addEventListener("keydown", function (e) {
     }
   }
 });
-  
+
 // ---------------- AUTO FILL ----------------
-busStopSelect.addEventListener("change", function () {
+document.getElementById("busStop").addEventListener("change", function () {
   const d = busStopIndex[this.value];
   if (!d) return;
   document.getElementById("route").value = d.routes.join(" / ");
@@ -261,7 +252,7 @@ busStopSelect.addEventListener("change", function () {
   document.getElementById("direction").value = d.direction;
 });
 
-// ---------------- ISSUE MAPPING (ORIGINAL) ----------------
+// ---------------- ISSUE MAPPING ----------------
 const mapping = {
   "Construction in progress nearby the bus stop": { sub: "A2 - Pax", cat: "A - Safety" },
   "Missing infrastructure": { sub: "B1 - Missing Pole", cat: "B - Insufficient Infra" },
@@ -286,23 +277,19 @@ let photos = [null, null, null];
 const photoContainer = document.getElementById("photoContainer");
 
 for (let i = 0; i < maxPhotos; i++) {
-
   const slot = document.createElement("div");
   slot.className = "photo-slot";
 
   slot.innerHTML = `
     <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
-
     <div class="controls">
       <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
       <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
     </div>
-
     <input type="file" id="file${i}" accept="image/*" class="hidden">
     <video id="video${i}" class="hidden" autoplay playsinline></video>
     <canvas id="canvas${i}" class="hidden"></canvas>
   `;
-
   photoContainer.appendChild(slot);
 
   const fileInput = document.getElementById(`file${i}`);
@@ -350,19 +337,6 @@ for (let i = 0; i < maxPhotos; i++) {
   };
 }
 
-// ---------------- AUTO-FILL TIMESTAMP ----------------
-function updateTimestamp() {
-  const now = new Date();
-
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
-
-  document.getElementById("timestamp").value = local;
-}
-
-window.onload = updateTimestamp;
-
 // ---------------- FORM SUBMISSION ----------------
 document.getElementById("profilingForm").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -374,10 +348,13 @@ document.getElementById("profilingForm").addEventListener("submit", function (e)
 
   alert("✅ Form submitted successfully!");
 });
+
+// ---------------- INIT ----------------
+window.onload = () => {
+  updateTimestamp();
+  loadBusStopCSV();
+};
 </script>
 
 </body>
 </html>
-
-
-
