@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bus Stop Profiling Survey</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #e8edf9;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .page-wrapper {
+    width: 420px;
+    height: 100vh;
+    background: white;
+    border-radius: 30px;
+    margin-top: 10px;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  .header {
+    background: #0b2a78;
+    padding: 22px;
+    color: white;
+    font-size: 23px;
+    font-weight: bold;
+    border-radius: 30px 30px 0 0;
+  }
+
+  .content { padding: 25px; }
+
+  label {
+    display: block;
+    margin-top: 18px;
+    font-weight: bold;
+    font-size: 15px;
+    color: #111;
+  }
+
+  input[type="text"], select, input[type="datetime-local"], textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid #c9c9c9;
+    font-size: 15px;
+  }
+
+  textarea {
+    resize: none;
+    min-height: 80px;
+    overflow-y: hidden;
+  }
+
+  .photo-slot {
+    width: 100%;
+    border: 2px dashed #2ecc71;
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 15px;
+    background: #f8fff8;
+  }
+
+  .upload-title {
+    text-align: center;
+    color: #1a8c3a;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .controls button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+  }
+
+  .btn-camera { background: #e67e22; }
+  .btn-upload { background: #2980b9; }
+  .hidden { display: none; }
+
+  button.submit-btn {
+    margin-top: 25px;
+    width: 100%;
+    padding: 15px;
+    background-color: #0b2a78;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+</style>
+</head>
+
+<body>
+<div class="page-wrapper">
+<div class="header">Bus Stop Profiling</div>
+<div class="content">
+
+<form id="profilingForm">
+
+<label>🕒 Timestamp</label>
+<input type="datetime-local" id="timestamp" required>
+  
+<label>🚌 Bus Stop</label>
+<select id="busStop" required>
+  <option value="">--Select Bus Stop--</option>
+</select>
+
+<label>1️⃣ Depot</label>
+<input type="text" id="depot" disabled>
+
+<label>2️⃣ Route Number</label>
+<input type="text" id="route" disabled>
+
+<label>4️⃣ Direction</label>
+<input type="text" id="direction" disabled>
+
+<label>5️⃣ Bus Stop Condition</label>
+<select id="condition" required>
+  <option value="">--Select Condition--</option>
+  <option>Covered Bus Stop</option>
+  <option>Pole Only</option>
+  <option>Layby</option>
+  <option>Non-Infrastructure</option>
+</select>
+
+<label>6️⃣ Issue</label>
+<select id="issue" required>
+  <option value="">--Select Issue--</option>
+  <option>Construction in progress nearby the bus stop</option>
+  <option>Missing infrastructure</option>
+  <option>Covered by trees</option>
+  <option>Malfunction lights</option>
+  <option>Outdated info panel</option>
+  <option>No bus marking - shelter</option>
+  <option>No bus marking - pole</option>
+  <option>No street lighting</option>
+  <option>Parking issue</option>
+</select>
+
+<label>7️⃣ Subcategory</label>
+<select id="subcat1" required></select>
+
+<label>8️⃣ Category</label>
+<select id="subcat2" required></select>
+
+<label>📝 Remark</label>
+<textarea id="remarks"></textarea>
+
+<label>📸 Upload Pictures</label>
+<div id="photoContainer"></div>
+
+<button type="submit" class="submit-btn">Send</button>
+</form>
+
+</div>
+</div>
+
+<script>
+// ---------------- AUTO TIMESTAMP ----------------
+function updateTimestamp() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString().slice(0,16);
+  document.getElementById("timestamp").value = local;
+}
+window.onload = updateTimestamp;
+
+// ---------------- ORIGINAL DATA ----------------
+const routeBusStops = {
+  "151": {
+    "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
+    "SL287 STADIUM MPS (BARAT)": "A-B"
+  },
+  "170": {
+    "SL283 DATARAN BANDAR BARU SELAYANG": "A-B",
+    "SL182 PANGSAPURI KENANGA": "A-B"
+  }
+};
+
+const depotRoutes = {
+  "Batu Caves": ["151", "170"]
+};
+
+// ---------------- BUILD BUS STOP MASTER ----------------
+const busStopIndex = {};
+
+for (const route in routeBusStops) {
+  for (const stop in routeBusStops[route]) {
+    if (!busStopIndex[stop]) {
+      busStopIndex[stop] = {
+        routes: [],
+        direction: routeBusStops[route][stop],
+        depot: ""
+      };
+    }
+    busStopIndex[stop].routes.push(route);
+  }
+}
+
+for (const depot in depotRoutes) {
+  depotRoutes[depot].forEach(route => {
+    for (const stop in busStopIndex) {
+      if (busStopIndex[stop].routes.includes(route)) {
+        busStopIndex[stop].depot = depot;
+      }
+    }
+  });
+}
+
+// ---------------- POPULATE BUS STOPS ----------------
+const busStopSelect = document.getElementById("busStop");
+Object.keys(busStopIndex).sort().forEach(stop => {
+  busStopSelect.innerHTML += `<option>${stop}</option>`;
+});
+
+// ---------------- TYPE-TO-SEARCH INSIDE BUS STOP SELECT ----------------
+let typeBuffer = "";
+let bufferTimeout = null;
+
+busStopSelect.addEventListener("keydown", function (e) {
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+    typeBuffer += e.key.toLowerCase();
+
+    clearTimeout(bufferTimeout);
+    bufferTimeout = setTimeout(() => typeBuffer = "", 700);
+
+    for (let i = 0; i < this.options.length; i++) {
+      if (this.options[i].text.toLowerCase().startsWith(typeBuffer)) {
+        this.selectedIndex = i;
+        this.dispatchEvent(new Event("change")); // auto-fill route/depot
+        break;
+      }
+    }
+  }
+});
+  
+// ---------------- AUTO FILL ----------------
+busStopSelect.addEventListener("change", function () {
+  const d = busStopIndex[this.value];
+  if (!d) return;
+  document.getElementById("route").value = d.routes.join(" / ");
+  document.getElementById("depot").value = d.depot;
+  document.getElementById("direction").value = d.direction;
+});
+
+// ---------------- ISSUE MAPPING (ORIGINAL) ----------------
+const mapping = {
+  "Construction in progress nearby the bus stop": { sub: "A2 - Pax", cat: "A - Safety" },
+  "Missing infrastructure": { sub: "B1 - Missing Pole", cat: "B - Insufficient Infra" },
+  "Covered by trees": { sub: "C1 - Routine", cat: "C - Maintenance" },
+  "Malfunction lights": { sub: "C2 - Infra", cat: "C - Maintenance" },
+  "Outdated info panel": { sub: "C2 - Infra", cat: "C - Maintenance" },
+  "No bus marking - shelter": { sub: "C3 - Bus Bay (Shelter)", cat: "C - Maintenance" },
+  "No bus marking - pole": { sub: "C4 - Bus Bay (Pole)", cat: "C - Maintenance" },
+  "No street lighting": { sub: "C5 - Street Lighting", cat: "C - Maintenance" },
+  "Parking issue": { sub: "D1 - Enforcement", cat: "D - Enforcement" }
+};
+
+document.getElementById("issue").addEventListener("change", function () {
+  const m = mapping[this.value];
+  document.getElementById("subcat1").innerHTML = `<option>${m.sub}</option>`;
+  document.getElementById("subcat2").innerHTML = `<option>${m.cat}</option>`;
+});
+
+// ---------------- PHOTO UPLOAD ----------------
+const maxPhotos = 3;
+let photos = [null, null, null];
+const photoContainer = document.getElementById("photoContainer");
+
+for (let i = 0; i < maxPhotos; i++) {
+
+  const slot = document.createElement("div");
+  slot.className = "photo-slot";
+
+  slot.innerHTML = `
+    <div class="upload-title" id="title${i}">Upload Picture ${i+1}</div>
+
+    <div class="controls">
+      <button type="button" class="btn-camera" id="cam${i}">📷 Take Photo</button>
+      <button type="button" class="btn-upload" id="upload${i}">📁 Upload</button>
+    </div>
+
+    <input type="file" id="file${i}" accept="image/*" class="hidden">
+    <video id="video${i}" class="hidden" autoplay playsinline></video>
+    <canvas id="canvas${i}" class="hidden"></canvas>
+  `;
+
+  photoContainer.appendChild(slot);
+
+  const fileInput = document.getElementById(`file${i}`);
+  const uploadBtn = document.getElementById(`upload${i}`);
+  const camBtn = document.getElementById(`cam${i}`);
+  const video = document.getElementById(`video${i}`);
+  const canvas = document.getElementById(`canvas${i}`);
+  const title = document.getElementById(`title${i}`);
+
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    photos[i] = fileInput.files[0];
+    title.textContent = "📷 Picture Selected";
+    title.style.color = "#0b2a78";
+  };
+
+  camBtn.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.classList.remove("hidden");
+      video.srcObject = stream;
+
+      camBtn.textContent = "📸 Capture Now";
+
+      camBtn.onclick = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+          photos[i] = new File([blob], `photo${i+1}.png`, { type: "image/png" });
+          title.textContent = "📷 Photo Captured";
+          title.style.color = "#0b2a78";
+        });
+
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.classList.add("hidden");
+        camBtn.textContent = "📷 Take Photo";
+      };
+
+    } catch (err) {
+      alert("Camera blocked or not available.");
+    }
+  };
+}
+
+// ---------------- AUTO-FILL TIMESTAMP ----------------
+function updateTimestamp() {
+  const now = new Date();
+
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
+  document.getElementById("timestamp").value = local;
+}
+
+window.onload = updateTimestamp;
+
+// ---------------- FORM SUBMISSION ----------------
+document.getElementById("profilingForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  if (photos.filter(p => p !== null).length < 1) {
+    alert("⚠️ Please upload at least 1 picture.");
+    return;
+  }
+
+  alert("✅ Form submitted successfully!");
+});
+</script>
+
+</body>
+</html>
+
+
+
+
